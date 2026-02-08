@@ -15,6 +15,7 @@ import { TABS } from '../../utils/common';
 import { ROUTES } from '../../utils/route';
 import { NoData } from '../../components/no-data.component';
 
+
 const UserListScreen = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole & 'All'>();
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,7 +92,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   tabContainer: { paddingHorizontal: 24 },
 });

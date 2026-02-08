@@ -1,59 +1,81 @@
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../utils/color.util';
-import { useUsers } from '../hooks/use-users.hook';
 import { useMemo } from 'react';
+import {
+  RefreshControl,
+  SectionList,
+  SectionListRenderItem,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useUsers } from '../hooks/use-users.hook';
 import { UserListItemVM } from '../services/graphql/types';
+import { colors } from '../utils/color.util';
+import { UserSection, UserItem } from '../utils/types';
 
-const renderItem = ({
+const buildSections = (data: UserListItemVM[]): UserSection[] => {
+  const sorted = [...data].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+  );
+
+  const map: Record<string, UserItem[]> = {};
+
+  sorted.forEach(user => {
+    const letter = user.name.charAt(0).toUpperCase();
+
+    if (!map[letter]) {
+      map[letter] = [];
+    }
+
+    map[letter].push({
+      id: user._id || user.id,
+      name: user.name,
+      role: user.role,
+    });
+  });
+
+  return Object.keys(map)
+    .sort()
+    .map(letter => ({
+      title: letter,
+      data: map[letter],
+    }));
+};
+
+const renderItem: SectionListRenderItem<UserItem, UserSection> = ({
   item,
   index,
-  userData,
-}: {
-  item: any;
-  index: number;
-  userData: UserListItemVM[];
 }) => (
-  <>
-    {index === 0 || userData[index - 1].letter !== item.letter ? (
-      <Text style={styles.letter}>{item.letter}</Text>
-    ) : null}
-
-    <View style={styles.card}>
-      <View style={styles.cardContent}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.letter}</Text>
-        </View>
-
-        <Text style={styles.name}>{item.name}</Text>
+  <View style={styles.card} key={index}>
+    <View style={styles.cardContent}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
       </View>
-      {item.role === 'Admin' ? (
-        <Text style={styles.role}>{item.role}</Text>
-      ) : null}
+
+      <Text style={styles.name}>{item.name}</Text>
     </View>
-  </>
+
+    {item.role === 'Admin' ? (
+      <Text style={styles.role}>{item.role}</Text>
+    ) : null}
+  </View>
 );
 
 export const UserList = ({ data }: { data: UserListItemVM[] }) => {
   const { onRefresh, refreshing } = useUsers();
-
-  const userData = useMemo(() => {
-    return data.map(user => ({
-      letter: user.name[0],
-      name: user.name,
-      role: user.role,
-      id: user._id || user.id,
-    }));
-  }, [data]);
+  const sections = useMemo(() => buildSections(data), [data]);
 
   return (
-    <FlatList
+    <SectionList
+      sections={sections}
+      keyExtractor={item => item.id + item.name}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       contentContainerStyle={styles.container}
-      data={data}
-      keyExtractor={(item, index) => item.letter + index.toString()}
-      renderItem={({ item, index }) => renderItem({ item, index, userData })}
+      renderSectionHeader={({ section }) => (
+        <Text style={styles.letter}>{section.title}</Text>
+      )}
+      renderItem={renderItem}
     />
   );
 };
