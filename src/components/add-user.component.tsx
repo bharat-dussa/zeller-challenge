@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   StyleSheet,
@@ -20,8 +20,14 @@ import CloseIcon from './icons/close.icon';
 import { TabBar } from './tab-bar.component';
 import { SharedValue } from 'react-native-reanimated';
 import { UserRole } from '../services/api/users/user.models';
+import { v4 as uuidv4 } from 'uuid';
 
-export const AddUser = () => {
+interface AddUserProps {
+  isEditMode: boolean;
+  user?: ZellerCustomer;
+}
+
+export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
   const [index, setIndex] = useTabIndex(0);
   const navigation = useNavigation();
 
@@ -33,7 +39,10 @@ export const AddUser = () => {
     resolver: zodResolver(addUserSchema),
     mode: 'onChange',
     defaultValues: {
-      roleIndex: 0,
+      firstName: user?.name?.split(' ')[0] || '',
+      lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+      email: user?.email || '',
+      roleIndex: user ? ROLES.indexOf(String(user.role)) : 0,
     },
   });
 
@@ -48,21 +57,39 @@ export const AddUser = () => {
 
   const service = useRealmService();
 
+  const onDelete = async () => {
+    if (!user) return;
+
+    await service.deleteUser(user.id);
+    onClose();
+  };
+
   const onSave = async (data: AddUserForm) => {
     data.roleIndex = (index as SharedValue<number>).value;
-    console.log('Data', data);
-    const c = await service.getUsersLocal();
-    const user: ZellerCustomer = {
-      id: String(c.length + 1),
+    const newUser: ZellerCustomer = {
+      id: isEditMode ? user.id || user._id || '' : uuidv4(),
       name: `${data.firstName} ${data.lastName}`.trim(),
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       role: ROLES[(index as SharedValue<number>).value] as UserRole,
     };
 
-    service.createUser(user).then(() => {
-      onClose();
-    });
+    if (isEditMode) {
+      await service.updateUser(newUser);
+    } else {
+      await service.createUser(newUser);
+    }
+
+    onClose();
   };
+
+  React.useEffect(() => {
+    if (user) {
+      //@ts-ignore
+      setIndex(ROLES.indexOf(user.role) as unknown as SharedValue<number>);
+    }
+  }, [setIndex, user]);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer} edges={['top', 'bottom']}>
@@ -139,12 +166,20 @@ export const AddUser = () => {
           />
         </View>
 
+        {isEditMode && (
+          <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+            <Text style={styles.deleteText}>Delete user</Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           onPress={handleSubmit(onSave)}
           style={[styles.saveButton, !isValid && styles.saveButtonDisabled]}
           disabled={!isValid}
         >
-          <Text style={styles.saveText}>Create user</Text>
+          <Text style={styles.saveText}>
+            {isEditMode ? 'Update' : 'Create'} user
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -247,6 +282,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingLeft: 10,
     paddingVertical: 4,
+  },
+
+  deleteButton: {
+    marginBottom: 12,
+    paddingVertical: 14,
+    borderRadius: 40,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.error,
+  },
+
+  deleteText: {
+    color: colors.error,
+    fontSize: 16,
+    fontWeight: '600',
   },
 
   saveButtonDisabled: {

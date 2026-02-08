@@ -26,9 +26,10 @@ export const mapUsersToListItems = (
   users: ZellerCustomer[]
 ): UserListItemVM[] => {
   return users.map(user => ({
-    id: user.id || '',
+    id: user?._id || user.id || '',
     name: String(user.name) || '',
     role: String(user.role) || '',
+    email: user.email,
     letter: String(user?.name?.charAt(0).toUpperCase()),
   }));
 };

@@ -22,6 +22,7 @@ export const buildSections = (data: UserListItemVM[]): UserSection[] => {
       id: user._id || user.id,
       name: user.name,
       role: user.role,
+      email: user.email,
     });
   });
 

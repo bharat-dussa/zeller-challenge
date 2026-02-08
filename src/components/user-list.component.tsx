@@ -1,51 +1,35 @@
+import { useNavigation } from '@react-navigation/native';
 import { useMemo } from 'react';
 import {
   RefreshControl,
   SectionList,
-  SectionListRenderItem,
+  SectionListRenderItemInfo,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useUsers } from '../hooks/use-users.hook';
 import { UserListItemVM } from '../services/graphql/types';
 import { colors } from '../utils/color.util';
-import { UserSection, UserItem } from '../utils/types';
+import { buildSections } from '../utils/common';
+import { ROUTES } from '../utils/route';
+import { UserItem, UserSection } from '../utils/types';
 
-const buildSections = (data: UserListItemVM[]): UserSection[] => {
-  const sorted = [...data].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
-  );
+interface RenderItem extends SectionListRenderItemInfo<UserItem, UserSection> {
+  navigation: any;
+}
 
-  const map: Record<string, UserItem[]> = {};
-
-  sorted.forEach(user => {
-    const letter = user.name.charAt(0).toUpperCase();
-
-    if (!map[letter]) {
-      map[letter] = [];
+const renderItem = ({ item, index, navigation }: RenderItem) => (
+  <TouchableOpacity
+    style={styles.card}
+    key={index}
+    onPress={() =>
+      navigation.navigate(ROUTES.addUserScreen, {
+        user: item,
+      })
     }
-
-    map[letter].push({
-      id: user._id || user.id,
-      name: user.name,
-      role: user.role,
-    });
-  });
-
-  return Object.keys(map)
-    .sort()
-    .map(letter => ({
-      title: letter,
-      data: map[letter],
-    }));
-};
-
-const renderItem: SectionListRenderItem<UserItem, UserSection> = ({
-  item,
-  index,
-}) => (
-  <View style={styles.card} key={index}>
+  >
     <View style={styles.cardContent}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
@@ -57,12 +41,13 @@ const renderItem: SectionListRenderItem<UserItem, UserSection> = ({
     {item.role === 'Admin' ? (
       <Text style={styles.role}>{item.role}</Text>
     ) : null}
-  </View>
+  </TouchableOpacity>
 );
 
 export const UserList = ({ data }: { data: UserListItemVM[] }) => {
   const { onRefresh, refreshing } = useUsers();
   const sections = useMemo(() => buildSections(data), [data]);
+  const navigation = useNavigation();
 
   return (
     <SectionList
@@ -75,7 +60,7 @@ export const UserList = ({ data }: { data: UserListItemVM[] }) => {
       renderSectionHeader={({ section }) => (
         <Text style={styles.letter}>{section.title}</Text>
       )}
-      renderItem={renderItem}
+      renderItem={props => renderItem({ ...props, navigation })}
     />
   );
 };

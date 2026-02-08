@@ -7,6 +7,8 @@ export interface IRealmService {}
 export const toRealmUser = (user: ZellerCustomer) => ({
   _id: user.id,
   name: user.name,
+  firstName: user.firstName,
+  lastName: user.lastName,
   email: user.email,
   role: user.role,
 });
@@ -15,6 +17,8 @@ export const fromRealmUser = (u: UserEntity): ZellerCustomer => ({
   id: u._id,
   name: u.name,
   email: u.email,
+  firstName: u.name,
+  lastName: u.name,
   role: u.role as ZellerCustomer['role'],
 });
 
@@ -49,6 +53,44 @@ export class RealmService implements IRealmService {
     this.realm.write(() => {
       users.forEach(user => {
         this.realm.create('User', toRealmUser(user), Realm.UpdateMode.Modified);
+      });
+    });
+  }
+
+  async updateUser(
+    user: Partial<ZellerCustomer> & { id: string },
+  ): Promise<void> {
+    this.realm.write(() => {
+      this.realm.create(
+        'User',
+        {
+          _id: user.id,
+          ...user,
+        },
+        Realm.UpdateMode.Modified,
+      );
+    });
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    this.realm.write(() => {
+      const user = this.realm.objectForPrimaryKey<UserEntity>('User', userId);
+
+      if (user) {
+        this.realm.delete(user);
+      }
+    });
+  }
+
+  async deleteUsers(userIds: string[]): Promise<void> {
+    if (!userIds.length) return;
+
+    this.realm.write(() => {
+      userIds.forEach(id => {
+        const user = this.realm.objectForPrimaryKey<UserEntity>('User', id);
+        if (user) {
+          this.realm.delete(user);
+        }
       });
     });
   }
