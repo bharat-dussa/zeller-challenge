@@ -2,6 +2,7 @@ import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../utils/color.util';
 import { useUsers } from '../hooks/use-users.hook';
 import { useMemo } from 'react';
+import { UserListItemVM } from '../services/graphql/types';
 
 const renderItem = ({
   item,
@@ -10,6 +11,7 @@ const renderItem = ({
 }: {
   item: any;
   index: number;
+  userData: UserListItemVM[];
 }) => (
   <>
     {index === 0 || userData[index - 1].letter !== item.letter ? (
@@ -31,19 +33,18 @@ const renderItem = ({
   </>
 );
 
-export const UserList = ({ data }) => {
-  const { loading, users, onRefresh, refreshing } = useUsers();
+export const UserList = ({ data }: { data: UserListItemVM[] }) => {
+  const { onRefresh, refreshing } = useUsers();
 
   const userData = useMemo(() => {
-    return users.map(user => ({
+    return data.map(user => ({
       letter: user.name[0],
       name: user.name,
       role: user.role,
-      id: user.id,
+      id: user._id || user.id,
     }));
-  }, [users]);
+  }, [data]);
 
-  console.log(refreshing);
   return (
     <FlatList
       refreshControl={

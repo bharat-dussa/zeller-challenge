@@ -1,31 +1,95 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Animated, {
   Easing,
+  interpolate,
   interpolateColor,
   SharedValue,
   useAnimatedStyle,
-  withTiming
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { colors } from '../utils/color.util';
 import SearchIcon from './icons/search.icon';
+
+type TabItemProps = {
+  label: string;
+  index: number;
+  tabWidth: number;
+  animatedIndex: SharedValue<number>;
+  onPress: (index: number) => void;
+  setTabWidth: (width: number) => void;
+};
+
+const TabItem = ({
+  label,
+  index,
+  tabWidth,
+  animatedIndex,
+  setTabWidth,
+  onPress,
+}: TabItemProps) => {
+  const animatedTextStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(
+      animatedIndex.value,
+      [index - 1, index, index + 1],
+      [colors.gray, colors.primary, colors.gray],
+    ),
+  }));
+
+  return (
+    <TouchableOpacity
+      onLayout={event => {
+        setTabWidth(event.nativeEvent.layout.width);
+      }}
+      style={[styles.tab, { width: tabWidth }]}
+      onPress={() => onPress(index)}
+    >
+      <Animated.Text style={[styles.activeTabText, animatedTextStyle]}>
+        {label}
+      </Animated.Text>
+    </TouchableOpacity>
+  );
+};
 
 export const TabBar = ({
   animatedIndex,
   tabs = [],
   onPress,
   search,
+  searchQuery,
+  onSearch,
 }: {
   animatedIndex: SharedValue<number>;
   tabs: string[];
-  onPress: (tabIndex: number) => void;
+  onPress: (idx: SharedValue<number>) => void;
   search?: boolean;
+  searchQuery?: string;
+  onSearch?: (text: string) => void;
 }) => {
   const [tabWidth, setTabWidth] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchProgress = useSharedValue(0); // 0 - tabs, 1 -search
+
   if (!animatedIndex) {
     throw new Error('Index is required');
   }
 
+  const toggleSearch = () => {
+    const value = searchProgress.value === 0 ? 1 : 0;
+    setIsSearching(is => !is);
+    searchProgress.value = withTiming(value, {
+      duration: 350,
+      easing: Easing.out(Easing.cubic),
+    });
+    onSearch?.('');
+  };
   const indicatorStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -39,48 +103,67 @@ export const TabBar = ({
 
   const handlePress = (tabIndex: number) => {
     animatedIndex.value = tabIndex;
-    onPress?.(tabIndex);
+    onPress?.(tabIndex as unknown as SharedValue<number>);
   };
 
-  
+  const tabsStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(searchProgress.value, [0, 1], [1, 0]),
+    transform: [
+      {
+        translateX: interpolate(searchProgress.value, [0, 1], [0, -30]),
+      },
+    ],
+  }));
+
+  const searchStyle = useAnimatedStyle(() => ({
+    opacity: searchProgress.value,
+    transform: [
+      {
+        translateX: interpolate(searchProgress.value, [0, 1], [30, 0]),
+      },
+    ],
+    position: 'absolute',
+    width: '100%',
+  }));
+
   return (
     <View style={styles.container}>
-      <View style={styles.tabsContainer}>
+      <Animated.View style={[styles.tabsContainer, tabsStyle]}>
         <Animated.View
           style={[styles.indicator, { width: tabWidth }, indicatorStyle]}
         />
+        {tabs.map((tab, index) => (
+          <TabItem
+            key={tab}
+            label={tab}
+            index={index}
+            tabWidth={tabWidth}
+            animatedIndex={animatedIndex}
+            onPress={handlePress}
+            setTabWidth={setTabWidth}
+          />
+        ))}
+      </Animated.View>
 
-        {tabs.map((tab, index) => {
-          const animatedTextStyle = useAnimatedStyle(() => ({
-            color: interpolateColor(
-              animatedIndex.value,
-              [
-                animatedIndex.value - 1,
-                animatedIndex.value,
-                animatedIndex.value + 1,
-              ],
-              [colors.gray, colors.primary, colors.gray],
-            ),
-          }));
-          return (
-            <TouchableOpacity
-              key={`tab-${tab}`}
-              onLayout={event => {
-                setTabWidth(event.nativeEvent.layout.width);
-              }}
-              style={[styles.tab, { width: tabWidth }]}
-              onPress={() => handlePress(index)}
-            >
-              <Animated.Text style={[styles.activeTabText, animatedTextStyle]}>
-                {tab}
-              </Animated.Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {search && isSearching ? (
+        <Animated.View style={searchStyle}>
+          <TextInput
+            placeholder="Search…"
+            value={searchQuery}
+            onChangeText={onSearch}
+            placeholderTextColor={colors.gray}
+            style={styles.searchInput}
+            autoFocus
+          />
+        </Animated.View>
+      ) : null}
       {search ? (
-        <TouchableOpacity>
-          <SearchIcon width={18} height={18} />
+        <TouchableOpacity onPress={toggleSearch}>
+          {isSearching ? (
+            <Text style={styles.cancelText}>Cancel</Text>
+          ) : (
+            <SearchIcon width={18} height={18} />
+          )}
         </TouchableOpacity>
       ) : null}
     </View>
@@ -120,6 +203,19 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 1,
     borderColor: colors.primary,
-    pointerEvents: 'none',
+  },
+  searchInput: {
+    height: 40,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: colors.tabBackground,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    color: colors.primary,
+  },
+  cancelText: {
+    color: colors.primary,
+    fontWeight: '600',
+    paddingRight: '4%',
   },
 });

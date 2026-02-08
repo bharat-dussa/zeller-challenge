@@ -13,6 +13,7 @@ export type ZellerCustomerConnection = {
 };
 
 export type UserListItemVM = {
+  _id: string;
   id: string;
   name: string;
   role: string;

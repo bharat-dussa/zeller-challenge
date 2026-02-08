@@ -6,28 +6,40 @@
  */
 
 import { NavigationContainer } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
-import {
-  SafeAreaProvider
-} from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { RealmProvider, RealmServiceProvider } from './src/context/realm-service.context';
+import { createEncryptedRealmConfig } from './src/db/realConfig';
 import { RootNavigator } from './src/navigation/root-navigator/root-navigator';
-import { RealmProvider } from '@realm/react';
-import "./src/services/local/realm"
 
 function App() {
+  const [config, setConfig] = useState<any>(null);
   const isDarkMode = useColorScheme() === 'dark';
+
+  useEffect(() => {
+    (async () => {
+      const cfg = await createEncryptedRealmConfig();
+      setConfig(cfg);
+    })();
+  }, []);
+
+  if (!config) return null;
 
   return (
     <SafeAreaProvider>
-      <RealmProvider >
-      <NavigationContainer>
-         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <RootNavigator />
-      </NavigationContainer>
+      <RealmProvider {...config}>
+        <RealmServiceProvider>
+          <NavigationContainer>
+            <StatusBar
+              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            />
+            <RootNavigator />
+          </NavigationContainer>
+        </RealmServiceProvider>
       </RealmProvider>
     </SafeAreaProvider>
   );
 }
-
 
 export default App;

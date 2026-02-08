@@ -10,13 +10,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRealmService } from '../context/realm-service.context';
 import { useTabIndex } from '../hooks/use-tab-index.hook';
+import { ZellerCustomer } from '../services/graphql/types';
 import { colors } from '../utils/color.util';
 import { ROLES } from '../utils/common';
 import { AddUserForm, addUserSchema } from '../validation/user-form.schema';
 import CloseIcon from './icons/close.icon';
 import { TabBar } from './tab-bar.component';
-import { createUserLocal } from '../services/local/realm/user.logic';
+import { SharedValue } from 'react-native-reanimated';
+import { UserRole } from '../services/api/users/user.models';
 
 export const AddUser = () => {
   const [index, setIndex] = useTabIndex(0);
@@ -35,38 +38,41 @@ export const AddUser = () => {
   });
 
   const onClose = () => {
+    //@ts-ignore
     navigation.pop();
   };
-  const onPressRole = (idx: number) => {
+  const onPressRole = (idx: SharedValue<number>) => {
+    //@ts-ignore
     setIndex(idx);
   };
 
-  const onSave = (data: AddUserForm) => {
-    data.roleIndex = index.value;
-    console.log("Data", data);
+  const service = useRealmService();
+
+  const onSave = async (data: AddUserForm) => {
+    data.roleIndex = (index as SharedValue<number>).value;
+    console.log('Data', data);
+    const c = await service.getUsersLocal();
     const user: ZellerCustomer = {
-      id: '4',
+      id: String(c.length + 1),
       name: `${data.firstName} ${data.lastName}`.trim(),
       email: data.email,
-      role: ROLES[index.value],
+      role: ROLES[(index as SharedValue<number>).value] as UserRole,
     };
 
-    createUserLocal(user);
-    navigation.pop();
+    service.createUser(user).then(() => {
+      onClose();
+    });
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safeAreaContainer} edges={['top', 'bottom']}>
       <View style={styles.container}>
-        <TouchableOpacity
-          style={{ marginLeft: 6, marginBottom: 30 }}
-          onPress={onClose}
-        >
+        <TouchableOpacity style={styles.closeIcon} onPress={onClose}>
           <CloseIcon />
         </TouchableOpacity>
 
         <View>
-          <Text style={{ fontWeight: '600', fontSize: 16 }}>New User</Text>
+          <Text style={styles.newUser}>New User</Text>
         </View>
         <View style={styles.content}>
           <Controller
@@ -126,7 +132,11 @@ export const AddUser = () => {
           />
 
           <Text style={styles.label}>User Role</Text>
-          <TabBar animatedIndex={index} tabs={ROLES} onPress={onPressRole} />
+          <TabBar
+            animatedIndex={index as SharedValue<number>}
+            tabs={ROLES}
+            onPress={onPressRole}
+          />
         </View>
 
         <TouchableOpacity
@@ -142,9 +152,9 @@ export const AddUser = () => {
 };
 
 const styles = StyleSheet.create({
+  safeAreaContainer: { flex: 1 },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingHorizontal: 14,
   },
 
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.inputBorder,
   },
 
   close: {
@@ -163,6 +173,9 @@ const styles = StyleSheet.create({
     width: 60,
   },
 
+  closeIcon: { marginLeft: 6, marginBottom: 30 },
+
+  newUser: { fontWeight: '600', fontSize: 16 },
   title: {
     flex: 1,
     textAlign: 'center',
@@ -172,21 +185,21 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    paddingVertical: 16,
+    paddingVertical: 20,
   },
 
   label: {
     fontSize: 13,
     color: colors.gray,
     marginBottom: 6,
-    marginTop: 16,
+    marginTop: 24,
   },
 
   input: {
     borderBottomWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.inputBorder,
     borderRadius: 10,
-    padding: 12,
+    padding: 20,
     fontSize: 15,
   },
 
@@ -213,7 +226,7 @@ const styles = StyleSheet.create({
   footer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
+    borderTopColor: colors.inputBorder,
   },
 
   saveButton: {
@@ -224,7 +237,7 @@ const styles = StyleSheet.create({
   },
 
   saveText: {
-    color: '#fff',
+    color: colors.cardBackground,
     fontSize: 16,
     fontWeight: '600',
   },

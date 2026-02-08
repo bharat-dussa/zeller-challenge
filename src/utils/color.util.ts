@@ -7,5 +7,6 @@ export const colors = {
   tabBackground: '#EFF5FA',
   cardBackground: '#FFFFFF',
   gray: '#666666',
-  error: '#FF3B30'
+  error: '#FF3B30',
+  inputBorder: '#E5E5EA'
 };
