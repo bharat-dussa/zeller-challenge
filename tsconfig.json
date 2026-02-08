@@ -3,6 +3,7 @@
   "compilerOptions": {
     "types": ["jest"],
   },
+  "moduleResolution": "nodenext",
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules", "**/Pods"]
 }
