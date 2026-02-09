@@ -48,7 +48,7 @@ export class RealmService implements IRealmService {
   }
 
   async createMutliUsers(users: ZellerCustomer[]) {
-    if (!users.length) [];
+    if (!users.length) return;
 
     this.realm.write(() => {
       users.forEach(user => {
