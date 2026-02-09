@@ -1,104 +1,131 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Zeller FE
 
-# Getting Started
+React Native app with offline-first data flow. GraphQL is used only as a remote sync source, while Realm is the single source of truth.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Run The App
 
-## Step 1: Start Metro
-
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
+1. Install dependencies
 
 ```sh
-# Using npm
-npm start
+# Using Yarn
+yarn
 
-# OR using Yarn
+# Or npm
+npm install
+```
+
+2. Start Metro
+
+```sh
 yarn start
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+3. Run on device/simulator
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
+# Android
 yarn android
-```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
+# iOS
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Build For Release
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### Android (APK)
 
-## Step 3: Modify your app
+```sh
+cd android
+./gradlew assembleRelease
+```
 
-Now that you have successfully run the app, let's make changes!
+Output: `android/app/build/outputs/apk/release/app-release.apk`
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Android (AAB)
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```sh
+cd android
+./gradlew bundleRelease
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Output: `android/app/build/outputs/bundle/release/app-release.aab`
 
-## Congratulations! :tada:
+### iOS (Archive)
 
-You've successfully run and modified your React Native App. :partying_face:
+Use Xcode:
 
-### Now what?
+1. Open `ios/zellerfe.xcworkspace`
+2. Select the `zellerfe` scheme
+3. Product -> Archive
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Or via command line (update scheme if needed):
 
-# Troubleshooting
+```sh
+cd ios
+xcodebuild -workspace zellerfe.xcworkspace -scheme zellerfe -configuration Release -archivePath build/zellerfe.xcarchive archive
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## Tests
 
-# Learn More
+```sh
+yarn test --runInBand
+```
 
-To learn more about React Native, take a look at the following resources:
+Latest run: **32 test suites, 62 tests passed**.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Packages Used
 
+Core dependencies:
 
-The app follows an offline-first architecture.
-GraphQL is used only as a remote sync source,
-while Realm acts as the single source of truth.
-This allows the app to function without
-network connectivity and simplifies testing.
+- React, React Native
+- React Navigation (native + native-stack)
+- Realm + @realm/react
+- GraphQL + graphql-request
+- React Hook Form + Zod
+- react-native-safe-area-context
+- react-native-reanimated
+- react-native-pager-view
+- react-native-svg
+- uuid
+
+Dev/testing:
+
+- Jest + react-test-renderer
+- TypeScript
+- ESLint + Prettier
+
+## Package Justification
+
+- React + React Native: Standard cross-platform UI/runtime with strong ecosystem and native performance.
+- React Navigation: Clear navigation contracts and platform-consistent transitions.
+- Realm + @realm/react: Local-first persistence, fast queries, and reactive data for offline workflows.
+- GraphQL + graphql-request: Lightweight client for server sync without heavy runtime overhead.
+- React Hook Form + Zod: Schema-driven validation with minimal re-render overhead.
+- react-native-safe-area-context: Correct layout on modern devices (notches, status bars).
+- react-native-reanimated: UI-thread animations for smooth, jank-free interactions.
+- react-native-pager-view: Native paging for performant, swipeable lists.
+- react-native-svg: Scalable icons and vector assets.
+- uuid: Consistent client-side IDs for offline creates and reconciliation.
+
+## Optimizations
+
+- Offline-first architecture with Realm as source of truth.
+- Minimal network dependency: GraphQL only for sync.
+- Memoized list shaping via `useMemo` in `use-users.hook.ts`.
+- Shared UI components to reduce rerenders and duplication.
+- Animated tab indicator and search transition powered by Reanimated to keep interactions smooth under load.
+
+Future optimization opportunities:
+
+- Add pagination/infinite scroll for large datasets.
+- Introduce background sync with retry/backoff and conflict resolution policies.
+- Precompute sectioned lists in Realm or memoize with stable selectors to reduce recompute churn.
+- Add list virtualization tuning (windowing, item layout hints) for lower memory footprint.
+
+## Environment Setup
+
+See the official React Native environment guide:
+
+```
+https://reactnative.dev/docs/environment-setup
+```
