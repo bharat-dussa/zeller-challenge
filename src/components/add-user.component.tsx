@@ -14,13 +14,12 @@ import { useRealmService } from '../context/realm-service.context';
 import { useTabIndex } from '../hooks/use-tab-index.hook';
 import { ZellerCustomer } from '../services/graphql/types';
 import { colors } from '../utils/color.util';
-import { ROLES } from '../utils/common';
+import { getRandomUuid, ROLES } from '../utils/common';
 import { AddUserForm, addUserSchema } from '../validation/user-form.schema';
 import CloseIcon from './icons/close.icon';
 import { TabBar } from './tab-bar.component';
 import { SharedValue } from 'react-native-reanimated';
 import { UserRole } from '../services/api/users/user.models';
-import { v4 as uuidv4 } from 'uuid';
 
 interface AddUserProps {
   isEditMode: boolean;
@@ -67,7 +66,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
   const onSave = async (data: AddUserForm) => {
     data.roleIndex = (index as SharedValue<number>).value;
     const newUser: ZellerCustomer = {
-      id: isEditMode ? user.id || user._id || '' : uuidv4(),
+      id: isEditMode ? user?.id || user?._id || '' : getRandomUuid(),
       name: `${data.firstName} ${data.lastName}`.trim(),
       firstName: data.firstName,
       lastName: data.lastName,

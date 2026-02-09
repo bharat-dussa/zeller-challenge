@@ -1,5 +1,7 @@
 import { UserListItemVM } from '../services/graphql/types';
 import { UserItem, UserSection } from './types';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 export const ROLES = ['Admin', 'Manager'];
 export const TABS = ['All', ...ROLES];
@@ -33,3 +35,6 @@ export const buildSections = (data: UserListItemVM[]): UserSection[] => {
       data: map[letter],
     }));
 };
+
+
+export const getRandomUuid = () => uuidv4();
