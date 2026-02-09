@@ -1,7 +1,7 @@
 # Zeller FE
 
-![Tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg)
-![Coverage](https://codecov.io/gh/OWNER/REPO/branch/main/graph/badge.svg)
+![Tests](https://github.com/bharat-dussa/zeller-challenge/actions/workflows/tests.yml/badge.svg)
+![Coverage](https://codecov.io/gh/bharat-dussa/zeller-challenge/branch/main/graph/badge.svg)
 
 React Native app with offline-first data flow. GraphQL is used only as a remote sync source, while Realm is the single source of truth.
 
