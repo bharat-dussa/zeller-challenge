@@ -1,5 +1,8 @@
 # Zeller FE
 
+![Tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg)
+![Coverage](https://codecov.io/gh/OWNER/REPO/branch/main/graph/badge.svg)
+
 React Native app with offline-first data flow. GraphQL is used only as a remote sync source, while Realm is the single source of truth.
 
 ## Run The App
@@ -72,6 +75,8 @@ yarn test --runInBand
 ```
 
 Latest run: **32 test suites, 62 tests passed**.
+
+CI runs tests with coverage on every push and pull request. Coverage reports are uploaded to Codecov.
 
 ## Packages Used
 
