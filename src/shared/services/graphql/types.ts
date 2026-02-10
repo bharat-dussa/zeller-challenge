@@ -1,4 +1,4 @@
-import { UserRole } from "../api/users/user.models";
+import { UserRole } from '../../models/user.models';
 
 export type ZellerCustomer = {
   _id?: string;

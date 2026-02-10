@@ -1,7 +1,7 @@
 type Loaded = {
   React: typeof import('react');
   ReactTestRenderer: typeof import('react-test-renderer');
-  Context: typeof import('../../../src/context/realm-service.context');
+  Context: typeof import('../../../src/app/providers/realm-service.context');
   mockFromRealm: jest.Mock;
 };
 
@@ -20,13 +20,13 @@ const loadModule = (realmValue: any): Loaded => {
     }),
   }));
 
-  jest.doMock('../../../src/services/realm/realm-service', () => ({
+  jest.doMock('../../../src/shared/services/realm/realm-service', () => ({
     RealmService: { fromRealm: mockFromRealm },
   }));
 
   const React = require('react');
   const ReactTestRenderer = require('react-test-renderer');
-  const Context = require('../../../src/context/realm-service.context');
+  const Context = require('../../../src/app/providers/realm-service.context');
 
   return { React, ReactTestRenderer, Context, mockFromRealm };
 };

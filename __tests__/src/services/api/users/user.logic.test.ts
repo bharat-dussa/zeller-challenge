@@ -2,7 +2,7 @@ import {
   filterUsersByRole,
   mapUsersToListItems,
   searchUsersByName,
-} from '../../../../../src/services/api/users/user.logic';
+} from '../../../../../src/features/users/services/api/users/user.logic';
 
 const users = [
   { id: '1', name: 'Alice', role: 'Admin', email: 'a@a.com' },

@@ -1,4 +1,4 @@
-import { getOrCreateKey } from '../../../src/db/secureKey';
+import { getOrCreateKey } from '../../../src/shared/db/secureKey';
 import * as Keychain from 'react-native-keychain';
 import { fromByteArray, toByteArray } from 'base64-js';
 

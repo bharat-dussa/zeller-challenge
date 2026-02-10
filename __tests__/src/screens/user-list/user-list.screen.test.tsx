@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import UserListScreen from '../../../../src/screens/user-list/user-list.screen';
-import { ROUTES } from '../../../../src/utils/route';
+import UserListScreen from '../../../../src/features/users/screens/user-list.screen';
+import { ROUTES } from '../../../../src/shared/utils/route';
 
 let mockUsers: any[] = [];
 let mockLoading = false;
@@ -13,11 +13,11 @@ let mockTabBarProps: any = null;
 let mockFloatingButtonProps: any = null;
 let mockPagerProps: any = null;
 
-jest.mock('../../../../src/hooks/use-users.hook', () => ({
+jest.mock('../../../../src/features/users/hooks/use-users.hook', () => ({
   useUsers: () => ({ loading: mockLoading, users: mockUsers }),
 }));
 
-jest.mock('../../../../src/hooks/use-tab-index.hook', () => ({
+jest.mock('../../../../src/shared/hooks/use-tab-index.hook', () => ({
   useTabIndex: () => [{ value: 0 }, mockSetIndex],
 }));
 
@@ -25,7 +25,7 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
 }));
 
-jest.mock('../../../../src/components/tab-bar.component', () => {
+jest.mock('../../../../src/shared/components/tab-bar.component', () => {
   const React = require('react');
   return {
     TabBar: (props: any) => {
@@ -35,7 +35,7 @@ jest.mock('../../../../src/components/tab-bar.component', () => {
   };
 });
 
-jest.mock('../../../../src/components/floating-button.component', () => {
+jest.mock('../../../../src/shared/components/floating-button.component', () => {
   const React = require('react');
   return {
     FloatingButton: (props: any) => {
@@ -45,21 +45,21 @@ jest.mock('../../../../src/components/floating-button.component', () => {
   };
 });
 
-jest.mock('../../../../src/components/loader.component', () => {
+jest.mock('../../../../src/shared/components/loader.component', () => {
   const React = require('react');
   return {
     Loader: (props: any) => React.createElement('Loader', props),
   };
 });
 
-jest.mock('../../../../src/components/no-data.component', () => {
+jest.mock('../../../../src/shared/components/no-data.component', () => {
   const React = require('react');
   return {
     NoData: (props: any) => React.createElement('NoData', props),
   };
 });
 
-jest.mock('../../../../src/components/user-list.component', () => {
+jest.mock('../../../../src/features/users/components/user-list.component', () => {
   const React = require('react');
   return {
     UserList: (props: any) => React.createElement('UserList', props, props.children),

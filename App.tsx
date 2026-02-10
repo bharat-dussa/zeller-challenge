@@ -9,9 +9,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { RealmProvider, RealmServiceProvider } from './src/context/realm-service.context';
-import { createEncryptedRealmConfig } from './src/db/realConfig';
-import { RootNavigator } from './src/navigation/root-navigator/root-navigator';
+import { RealmProvider, RealmServiceProvider } from './src/app/providers/realm-service.context';
+import { createEncryptedRealmConfig } from './src/shared/db/realConfig';
+import { RootNavigator } from './src/app/navigation/root-navigator';
 
 function App() {
   const [config, setConfig] = useState<any>(null);

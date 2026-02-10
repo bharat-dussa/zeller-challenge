@@ -1,4 +1,4 @@
-import { addUserSchema } from '../../../src/validation/user-form.schema';
+import { addUserSchema } from '../../../src/features/users/validation/user-form.schema';
 
 describe('validation/user-form.schema', () => {
   test('accepts valid data', () => {

@@ -1,6 +1,6 @@
-import { LIST_ZELLER_CUSTOMERS } from '../../graphql/queries';
-import { ZellerCustomer } from '../../graphql/types';
-import { graphqlClient } from '../graphqlClient';
+import { ZellerCustomer } from '../../../../../shared/services/graphql/types';
+import { graphqlClient } from '../../../../../shared/services/api/graphqlClient';
+import { LIST_ZELLER_CUSTOMERS } from '../../../../../shared/services/graphql/queries';
 
 type Response = {
   listZellerCustomers: {

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { Loader } from '../../../src/components/loader.component';
+import { Loader } from '../../../src/shared/components/loader.component';
 
 describe('components/Loader', () => {
   test('renders loading text', () => {

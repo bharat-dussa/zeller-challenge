@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { TabBar } from '../../../src/components/tab-bar.component';
+import { TabBar } from '../../../src/shared/components/tab-bar.component';
 
-jest.mock('../../../src/components/icons/search.icon', () => (props: any) => null);
+jest.mock('../../../src/shared/components/icons/search.icon', () => (props: any) => null);
 
 describe('components/TabBar', () => {
   test('throws when animatedIndex missing', () => {

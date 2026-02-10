@@ -1,5 +1,5 @@
-import { UserListItemVM, ZellerCustomer } from "../../graphql/types";
-import { UserRole } from "./user.models";
+import { UserListItemVM, ZellerCustomer } from '../../../../shared/services/graphql/types';
+import { UserRole } from '../../../../shared/models/user.models';
 
 export const filterUsersByRole = (
   users: ZellerCustomer[],

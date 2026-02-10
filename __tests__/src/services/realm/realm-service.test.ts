@@ -3,7 +3,7 @@ import {
   RealmService,
   fromRealmUser,
   toRealmUser,
-} from '../../../../src/services/realm/realm-service';
+} from '../../../../src/shared/services/realm/realm-service';
 
 type RealmInstance = {
   write: jest.Mock;

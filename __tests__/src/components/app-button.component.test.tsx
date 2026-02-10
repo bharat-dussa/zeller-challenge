@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import AppButton from '../../../src/components/app-button.component';
+import AppButton from '../../../src/shared/components/app-button.component';
 
 describe('components/AppButton', () => {
   test('renders and handles press', () => {

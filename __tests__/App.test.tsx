@@ -5,10 +5,10 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../App';
-import { createEncryptedRealmConfig } from '../src/db/realConfig';
-import { RootNavigator } from '../src/navigation/root-navigator/root-navigator';
+import { createEncryptedRealmConfig } from '../src/shared/db/realConfig';
+import { RootNavigator } from '../src/app/navigation/root-navigator';
 
-jest.mock('../src/db/realConfig', () => ({
+jest.mock('../src/shared/db/realConfig', () => ({
   createEncryptedRealmConfig: jest.fn(),
 }));
 

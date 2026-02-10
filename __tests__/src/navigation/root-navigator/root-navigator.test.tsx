@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { RootNavigator } from '../../../../src/navigation/root-navigator/root-navigator';
+import { RootNavigator } from '../../../../src/app/navigation/root-navigator';
 
 describe('navigation/RootNavigator', () => {
   test('renders without crashing', () => {

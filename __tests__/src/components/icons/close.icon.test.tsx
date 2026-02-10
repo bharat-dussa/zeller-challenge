@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import CloseIcon from '../../../../src/components/icons/close.icon';
+import CloseIcon from '../../../../src/shared/components/icons/close.icon';
 
 describe('components/icons/CloseIcon', () => {
   test('renders svg', () => {

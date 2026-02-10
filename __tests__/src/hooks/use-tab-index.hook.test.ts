@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { useTabIndex } from '../../../src/hooks/use-tab-index.hook';
+import { useTabIndex } from '../../../src/shared/hooks/use-tab-index.hook';
 
 describe('hooks/use-tab-index', () => {
   test('returns default value and setter', () => {

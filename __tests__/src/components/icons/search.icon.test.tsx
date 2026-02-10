@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import SearchIcon from '../../../../src/components/icons/search.icon';
+import SearchIcon from '../../../../src/shared/components/icons/search.icon';
 
 describe('components/icons/SearchIcon', () => {
   test('renders svg', () => {

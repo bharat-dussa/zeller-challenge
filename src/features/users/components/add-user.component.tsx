@@ -10,16 +10,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRealmService } from '../context/realm-service.context';
-import { useTabIndex } from '../hooks/use-tab-index.hook';
-import { ZellerCustomer } from '../services/graphql/types';
-import { colors } from '../utils/color.util';
-import { getRandomUuid, ROLES } from '../utils/common';
+import { useRealmService } from '../../../app/providers/realm-service.context';
+import { useTabIndex } from '../../../shared/hooks/use-tab-index.hook';
+import { ZellerCustomer } from '../../../shared/services/graphql/types';
+import { colors } from '../../../shared/utils/color.util';
+import { getRandomUuid, ROLES } from '../../../shared/utils/common';
 import { AddUserForm, addUserSchema } from '../validation/user-form.schema';
-import CloseIcon from './icons/close.icon';
-import { TabBar } from './tab-bar.component';
+import CloseIcon from '../../../shared/components/icons/close.icon';
+import { TabBar } from '../../../shared/components/tab-bar.component';
 import { SharedValue } from 'react-native-reanimated';
-import { UserRole } from '../services/api/users/user.models';
+import { UserRole } from '../../../shared/models/user.models';
 
 interface AddUserProps {
   isEditMode: boolean;

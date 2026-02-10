@@ -4,16 +4,16 @@ import { StyleSheet, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { SharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FloatingButton } from '../../components/floating-button.component';
-import { Loader } from '../../components/loader.component';
-import { TabBar } from '../../components/tab-bar.component';
-import { UserList } from '../../components/user-list.component';
-import { useTabIndex } from '../../hooks/use-tab-index.hook';
-import { useUsers } from '../../hooks/use-users.hook';
-import { UserRole } from '../../services/api/users/user.models';
-import { TABS } from '../../utils/common';
-import { ROUTES } from '../../utils/route';
-import { NoData } from '../../components/no-data.component';
+import { Loader } from '../../../shared/components/loader.component';
+import { TabBar } from '../../../shared/components/tab-bar.component';
+import { UserList } from '../components/user-list.component';
+import { useTabIndex } from '../../../shared/hooks/use-tab-index.hook';
+import { useUsers } from '../hooks/use-users.hook';
+import { UserRole } from '../../../shared/models/user.models';
+import { TABS } from '../../../shared/utils/common';
+import { ROUTES } from '../../../shared/utils/route';
+import { NoData } from '../../../shared/components/no-data.component';
+import { FloatingButton } from '../../../shared/components/floating-button.component';
 
 
 const UserListScreen = () => {

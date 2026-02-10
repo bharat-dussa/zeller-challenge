@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { NoData } from '../../../src/components/no-data.component';
+import { NoData } from '../../../src/shared/components/no-data.component';
 
 describe('components/NoData', () => {
   test('renders no data text', () => {

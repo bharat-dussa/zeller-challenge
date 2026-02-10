@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { FloatingButton } from '../../../src/components/floating-button.component';
+import { FloatingButton } from '../../../src/shared/components/floating-button.component';
 
 describe('components/FloatingButton', () => {
   test('renders and handles press', () => {

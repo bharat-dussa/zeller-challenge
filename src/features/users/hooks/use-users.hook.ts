@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery, useRealmService } from '../context/realm-service.context';
-import { UserEntity } from '../db/schemas/user.schemas';
+import { useQuery, useRealmService } from '../../../app/providers/realm-service.context';
+import { UserEntity } from '../../../shared/db/schemas/user.schemas';
 import { fetchUsers } from '../services/api/users/user.api';
 import {
   filterUsersByRole,
   mapUsersToListItems,
   searchUsersByName,
 } from '../services/api/users/user.logic';
-import { UserRole } from '../services/api/users/user.models';
-import { ZellerCustomer } from '../services/graphql/types';
+import { UserRole } from '../../../shared/models/user.models';
+import { ZellerCustomer } from '../../../shared/services/graphql/types';
 
 export const useUsers = (role?: UserRole & 'All', searchQuery: string = '') => {
   const [loading, setLoading] = useState(false);

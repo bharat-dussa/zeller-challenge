@@ -10,11 +10,11 @@ import {
   View,
 } from 'react-native';
 import { useUsers } from '../hooks/use-users.hook';
-import { UserListItemVM } from '../services/graphql/types';
-import { colors } from '../utils/color.util';
-import { buildSections } from '../utils/common';
-import { ROUTES } from '../utils/route';
-import { UserItem, UserSection } from '../utils/types';
+import { UserListItemVM } from '../../../shared/services/graphql/types';
+import { colors } from '../../../shared/utils/color.util';
+import { buildSections } from '../../../shared/utils/common';
+import { ROUTES } from '../../../shared/utils/route';
+import { UserItem, UserSection } from '../../../shared/utils/types';
 
 interface RenderItem extends SectionListRenderItemInfo<UserItem, UserSection> {
   navigation: any;

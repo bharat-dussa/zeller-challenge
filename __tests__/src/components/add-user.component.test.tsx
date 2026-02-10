@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import AddUser from '../../../src/components/add-user.component';
-import { ROLES } from '../../../src/utils/common';
+import AddUser from '../../../src/features/users/components/add-user.component';
+import { ROLES } from '../../../src/shared/utils/common';
 
 const mockCreateUser = jest.fn();
 const mockUpdateUser = jest.fn();
@@ -23,7 +23,7 @@ const mockSetIndex = jest.fn((next: number) => {
 
 let mockTabBarProps: any = null;
 
-jest.mock('../../../src/context/realm-service.context', () => ({
+jest.mock('../../../src/app/providers/realm-service.context', () => ({
   useRealmService: () => ({
     createUser: mockCreateUser,
     updateUser: mockUpdateUser,
@@ -31,16 +31,16 @@ jest.mock('../../../src/context/realm-service.context', () => ({
   }),
 }));
 
-jest.mock('../../../src/hooks/use-tab-index.hook', () => ({
+jest.mock('../../../src/shared/hooks/use-tab-index.hook', () => ({
   useTabIndex: () => [mockIndex, mockSetIndex],
 }));
 
-jest.mock('../../../src/utils/common', () => ({
+jest.mock('../../../src/shared/utils/common', () => ({
   ROLES: ['Admin', 'Manager'],
   getRandomUuid: () => 'uuid-1',
 }));
 
-jest.mock('../../../src/components/tab-bar.component', () => {
+jest.mock('../../../src/shared/components/tab-bar.component', () => {
   const React = require('react');
   return {
     TabBar: (props: any) => {

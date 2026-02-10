@@ -1,8 +1,8 @@
-import { fetchUsers } from '../../../../../src/services/api/users/user.api';
-import { graphqlClient } from '../../../../../src/services/api/graphqlClient';
-import { LIST_ZELLER_CUSTOMERS } from '../../../../../src/services/graphql/queries';
+import { fetchUsers } from '../../../../../src/features/users/services/api/users/user.api';
+import { graphqlClient } from '../../../../../src/shared/services/api/graphqlClient';
+import { LIST_ZELLER_CUSTOMERS } from '../../../../../src/shared/services/graphql/queries';
 
-jest.mock('../../../../../src/services/api/graphqlClient', () => ({
+jest.mock('../../../../../src/shared/services/api/graphqlClient', () => ({
   graphqlClient: { request: jest.fn() },
 }));
 

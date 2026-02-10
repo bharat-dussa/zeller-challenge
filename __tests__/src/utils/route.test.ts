@@ -1,4 +1,4 @@
-import { ROUTES } from '../../../src/utils/route';
+import { ROUTES } from '../../../src/shared/utils/route';
 
 describe('utils/route', () => {
   test('exports routes', () => {

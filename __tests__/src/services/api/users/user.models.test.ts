@@ -1,4 +1,4 @@
-import '../../../../../src/services/api/users/user.models';
+import '../../../../../src/shared/models/user.models';
 
 test('user.models module loads', () => {
   expect(true).toBe(true);

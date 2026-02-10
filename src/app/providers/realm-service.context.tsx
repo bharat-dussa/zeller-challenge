@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createRealmContext } from '@realm/react';
-import { SCHEMA } from '../db/schemas';
-import { RealmService } from '../services/realm/realm-service';
+import { SCHEMA } from '../../shared/db/schemas';
+import { RealmService } from '../../shared/services/realm/realm-service';
 
 export const { RealmProvider, useRealm, useQuery, useObject } =
   createRealmContext({ schema: SCHEMA });

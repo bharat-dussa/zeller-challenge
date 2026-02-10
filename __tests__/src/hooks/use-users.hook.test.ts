@@ -1,18 +1,18 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { useUsers } from '../../../src/hooks/use-users.hook';
-import { fetchUsers } from '../../../src/services/api/users/user.api';
+import { useUsers } from '../../../src/features/users/hooks/use-users.hook';
+import { fetchUsers } from '../../../src/features/users/services/api/users/user.api';
 import {
   useQuery,
   useRealmService,
-} from '../../../src/context/realm-service.context';
+} from '../../../src/app/providers/realm-service.context';
 
-jest.mock('../../../src/context/realm-service.context', () => ({
+jest.mock('../../../src/app/providers/realm-service.context', () => ({
   useQuery: jest.fn(),
   useRealmService: jest.fn(),
 }));
 
-jest.mock('../../../src/services/api/users/user.api', () => ({
+jest.mock('../../../src/features/users/services/api/users/user.api', () => ({
   fetchUsers: jest.fn(),
 }));
 

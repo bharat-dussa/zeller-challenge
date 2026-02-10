@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { UserList } from '../../../src/components/user-list.component';
-import { ROUTES } from '../../../src/utils/route';
+import { UserList } from '../../../src/features/users/components/user-list.component';
+import { ROUTES } from '../../../src/shared/utils/route';
 
 const mockNavigate = jest.fn();
 const mockOnRefresh = jest.fn();
@@ -10,7 +10,7 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
 }));
 
-jest.mock('../../../src/hooks/use-users.hook', () => ({
+jest.mock('../../../src/features/users/hooks/use-users.hook', () => ({
   useUsers: () => ({ onRefresh: mockOnRefresh, refreshing: false }),
 }));
 
