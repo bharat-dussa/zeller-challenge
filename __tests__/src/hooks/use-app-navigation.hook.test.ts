@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
 import { renderHook } from '@testing-library/react-native';
+import { useAppNavigation } from '../../../src/shared/hooks/use-app-navigation.hook';
 
 const mockNavigation = {
   navigate: jest.fn(),
@@ -22,7 +22,7 @@ describe('useAppNavigation', () => {
   });
 
   it('returns navigation instance', () => {
-    const { result } = renderHook(() => useNavigation());
+    const { result } = renderHook(() => useAppNavigation());
 
     expect(mockUseNavigation).toHaveBeenCalledTimes(1);
     expect(result.current).toBe(mockNavigation);
