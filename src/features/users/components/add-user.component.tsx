@@ -223,7 +223,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
         >
           <BottomSheetContent
             title={
-              isValid && isDeleteClicked
+              isDeleteClicked
                 ? t.messages['delete-user-prompt']
                 : t.messages['please-clear-form-errors']
             }

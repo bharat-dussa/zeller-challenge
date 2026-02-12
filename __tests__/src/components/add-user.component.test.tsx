@@ -239,6 +239,9 @@ describe('components/AddUser', () => {
     fireEvent.press(screen.getByTestId('add-user-delete-button'));
 
     await waitFor(() => {
+      expect(screen.getByTestId('bottom-sheet-content-title').props.children).toBe(
+        t.messages['delete-user-prompt'],
+      );
       expect(screen.getByTestId('bottom-sheet-secondary-button')).toBeTruthy();
     });
 
