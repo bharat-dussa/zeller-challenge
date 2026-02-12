@@ -16,8 +16,13 @@ React Native app with offline-first data flow. GraphQL is used only as a remote 
 <img  width="280" height="600" alt="simulator_screenshot_02119C41-4B3A-4471-A94D-A6C659F6D3E6" src="https://github.com/user-attachments/assets/1aca1a3f-dd0f-4cdc-8810-3a3e376a7924" />
 <img width="280" height="600" alt="simulator_screenshot_7D518008-9243-4DD3-AB07-45D7B9D8070F" src="https://github.com/user-attachments/assets/d8aba064-914d-47c3-a313-7528a3085dc2" />
 <img width="280" height="600" alt="simulator_screenshot_17644C5F-7C55-42BB-9E19-DDAC88DC1199" src="https://github.com/user-attachments/assets/fd4236dc-bfb0-454c-a618-924ccc056069" />
+<img width="280" height="600" alt="simulator_screenshot_A3295AAA-2EF3-468C-BEED-00AA6D8F90A5" src="https://github.com/user-attachments/assets/4f895817-0ed7-4658-b5be-30434bdc4eac" />
+<img width="280" height="600" alt="simulator_screenshot_32F2C795-ED6F-4D3F-9ED2-4CA8263A93BC" src="https://github.com/user-attachments/assets/5bc8c90d-76d3-466d-a961-d359944dd3cc" />
+
+<img width="280" height="600" alt="simulator_screenshot_FCE07EE3-265F-4F89-8EDB-360F119066CD" src="https://github.com/user-attachments/assets/cba28030-3ffe-48ca-a1c3-b3cd0b810c6f" />
 
 ## Run The App
+
 
 
 1. Install dependencies
