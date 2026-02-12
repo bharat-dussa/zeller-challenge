@@ -41,20 +41,26 @@ export const AppBottomSheet = ({
 
   return (
     <Modal
+      testID="app-bottom-sheet-modal"
       visible={visible}
       transparent
       animationType="none"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        {/* Backdrop */}
-        <Animated.View style={[styles.backdrop, backdropStyle]}>
-          <Pressable style={styles.flex} onPress={onClose} />
+      <View testID="app-bottom-sheet-container" style={styles.container}>
+        <Animated.View
+          testID="app-bottom-sheet-backdrop"
+          style={[styles.backdrop, backdropStyle]}
+        >
+          <Pressable
+            testID="app-bottom-sheet-backdrop-pressable"
+            style={styles.flex}
+            onPress={onClose}
+          />
         </Animated.View>
 
-        {/* Bottom Sheet */}
-        <Animated.View style={[styles.sheet, sheetStyle]}>
-          <View style={styles.handle} />
+        <Animated.View testID="app-bottom-sheet-sheet" style={[styles.sheet, sheetStyle]}>
+          <View testID="app-bottom-sheet-handle" style={styles.handle} />
           {children}
         </Animated.View>
       </View>
@@ -69,7 +75,7 @@ const styles = StyleSheet.create({
   },
 
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'black',
   },
 

@@ -4,8 +4,10 @@ import { colors } from '../utils/color.util';
 
 export const Loader = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Loading...</Text>
+    <View testID="loader-container" style={styles.container}>
+      <Text testID="loader-text" style={styles.text}>
+        Loading...
+      </Text>
     </View>
   );
 };

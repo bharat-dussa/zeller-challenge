@@ -95,7 +95,7 @@ Core dependencies:
 
 Dev/testing:
 
-- Jest + react-test-renderer
+- @testing-library/react-native
 - TypeScript
 - ESLint + Prettier
 

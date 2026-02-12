@@ -26,8 +26,8 @@ const UserListScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.flex}>
-      <View style={styles.tabContainer}>
+    <SafeAreaView testID="user-list-screen" style={styles.flex}>
+      <View testID="user-list-tab-container" style={styles.tabContainer}>
         <TabBar
           tabs={TABS}
           onPress={onPress}
@@ -39,6 +39,7 @@ const UserListScreen = () => {
       </View>
 
       <PagerView
+        testID="user-list-pager"
         ref={pagerRef}
         style={styles.flex}
         initialPage={0}
@@ -49,12 +50,13 @@ const UserListScreen = () => {
         {TABS.map((role, idx) => (
           <UserList
             key={`${role}-${idx}`}
+            testID={`user-list-page-${idx}`}
             role={role}
             searchQuery={searchQuery}
           />
         ))}
       </PagerView>
-      <FloatingButton onPress={onPressUserAdd} />
+      <FloatingButton testID="user-list-add-button" onPress={onPressUserAdd} />
     </SafeAreaView>
   );
 };

@@ -15,6 +15,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'label';
 export type AppButtonProps = {
   title: string;
   onPress?: () => void;
+  testID?: string;
 
   variant?: ButtonVariant;
   loading?: boolean;
@@ -31,6 +32,7 @@ export type AppButtonProps = {
 export const AppButton = ({
   title,
   onPress,
+  testID = 'app-button',
   variant = 'primary',
   loading = false,
   disabled = false,
@@ -59,6 +61,7 @@ export const AppButton = ({
 
   return (
     <TouchableOpacity
+      testID={testID}
       activeOpacity={0.8}
       onPress={onPress}
       disabled={isDisabled}
@@ -69,7 +72,9 @@ export const AppButton = ({
       ) : (
         <View style={styles.content}>
           {leftIcon}
-          <Text style={textStyles}>{title}</Text>
+          <Text testID={`${testID}-label`} style={textStyles}>
+            {title}
+          </Text>
           {rightIcon}
         </View>
       )}

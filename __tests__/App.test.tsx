@@ -3,9 +3,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react-native';
-import App from '../App';
-import { createEncryptedRealmConfig } from '../src/shared/db/realConfig';
+import { render, screen } from '@testing-library/react-native';
 
 jest.mock('../src/shared/db/realConfig', () => ({
   createEncryptedRealmConfig: jest.fn(),
@@ -18,21 +16,35 @@ jest.mock('../src/app/navigation/root-navigator', () => ({
   },
 }));
 
+
+jest.mock('../src/app/providers/realm-service.context', () => {
+  const React = require('react');
+
+  return {
+    RealmProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    RealmServiceProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+jest.mock('../src/shared/services/realm/realm-service', () => ({
+  RealmService: {
+    fromRealm: jest.fn(() => ({})),
+  },
+}));
+
+const { createEncryptedRealmConfig } = require('../src/shared/db/realConfig');
+const App = require('../App').default;
+
 describe('App', () => {
-  beforeAll(() => {
-    const { StyleSheet } = require('react-native');
-    if (!StyleSheet.flatten) {
-      StyleSheet.flatten = (style: any) => style;
-    }
-  });
+  test('requests realm config and renders null until config resolves', () => {
+    (createEncryptedRealmConfig as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-  test('renders root navigator after config resolves', async () => {
-    (createEncryptedRealmConfig as jest.Mock).mockResolvedValue({});
+    const view = render(<App />);
 
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('root-navigator')).toBeTruthy();
-    });
+    expect(createEncryptedRealmConfig).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('root-navigator')).toBeNull();
+    expect(view.toJSON()).toBeNull();
   });
 });

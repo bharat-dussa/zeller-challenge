@@ -1,14 +1,11 @@
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
+import { render, screen } from '@testing-library/react-native';
 import { NoData } from '../../../src/shared/components/no-data.component';
 
 describe('components/NoData', () => {
   test('renders no data text', () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<NoData />);
-    });
-    const text = renderer!.root.findByType('Text');
-    expect(text.props.children).toBe('No Data');
+    render(<NoData />);
+    expect(screen.getByTestId('no-data-container')).toBeTruthy();
+    expect(screen.getByTestId('no-data-text').props.children).toBe('No Data');
   });
 });

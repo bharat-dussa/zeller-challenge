@@ -17,14 +17,16 @@ export const BottomSheetContent: FC<BottomSheetContentProps> = ({
   secondaryButtonProps,
 }) => {
   return (
-    <View style={styles.contentContainer}>
-      <Text style={styles.modalText}>{title}</Text>
-      <View style={styles.buttonContainer}>
-        <ShowWhen condition={!!primaryButtonProps?.title}>
-          <AppButton {...secondaryButtonProps!} />
-        </ShowWhen>
+    <View testID="bottom-sheet-content" style={styles.contentContainer}>
+      <Text testID="bottom-sheet-content-title" style={styles.modalText}>
+        {title}
+      </Text>
+      <View testID="bottom-sheet-content-buttons" style={styles.buttonContainer}>
         <ShowWhen condition={!!secondaryButtonProps?.title}>
-          <AppButton {...primaryButtonProps!} />
+          <AppButton testID="bottom-sheet-secondary-button" {...secondaryButtonProps!} />
+        </ShowWhen>
+        <ShowWhen condition={!!primaryButtonProps?.title}>
+          <AppButton testID="bottom-sheet-primary-button" {...primaryButtonProps!} />
         </ShowWhen>
       </View>
     </View>

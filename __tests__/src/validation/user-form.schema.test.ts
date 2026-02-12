@@ -6,7 +6,7 @@ describe('validation/user-form.schema', () => {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane@doe.com',
-      roleIndex: 0,
+      role: 'Admin',
     });
     expect(result.success).toBe(true);
   });
@@ -16,7 +16,7 @@ describe('validation/user-form.schema', () => {
       firstName: '',
       lastName: '123',
       email: 'bad-email',
-      roleIndex: 0,
+      role: '',
     });
     expect(result.success).toBe(false);
   });

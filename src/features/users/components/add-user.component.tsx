@@ -112,22 +112,33 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
   }, [isEditMode, trigger]);
 
   return (
-    <SafeAreaView style={styles.safeAreaContainer} edges={['top', 'bottom']}>
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.closeIcon} onPress={onClose}>
+    <SafeAreaView
+      testID="add-user-screen"
+      style={styles.safeAreaContainer}
+      edges={['top', 'bottom']}
+    >
+      <View testID="add-user-container" style={styles.container}>
+        <TouchableOpacity
+          testID="add-user-close-button"
+          style={styles.closeIcon}
+          onPress={onClose}
+        >
           <CloseIcon />
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.newUser}>{t.labels['new-user-cap']}</Text>
+          <Text testID="add-user-title" style={styles.newUser}>
+            {t.labels['new-user-cap']}
+          </Text>
         </View>
-        <View style={styles.content}>
+        <View testID="add-user-content" style={styles.content}>
           <Controller
             control={control}
             name="firstName"
             render={({ field }) => (
               <>
                 <TextInput
+                  testID="add-user-first-name-input"
                   placeholder={t.labels['first-name']}
                   style={styles.input}
                   onChangeText={field.onChange}
@@ -146,6 +157,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             render={({ field }) => (
               <>
                 <TextInput
+                  testID="add-user-last-name-input"
                   placeholder={t.labels['last-name']}
                   style={styles.input}
                   onChangeText={field.onChange}
@@ -164,6 +176,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             render={({ field }) => (
               <>
                 <TextInput
+                  testID="add-user-email-input"
                   placeholder={t.labels.email}
                   style={styles.input}
                   autoCapitalize="none"
@@ -178,21 +191,24 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             )}
           />
 
-          <Text style={styles.label}>{t.labels['user-role-cap']}</Text>
+          <Text testID="add-user-role-label" style={styles.label}>
+            {t.labels['user-role-cap']}
+          </Text>
           <TabBar animatedIndex={index} tabs={ROLES} onPress={onPressRole} />
         </View>
 
         {isEditMode && (
-          <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-            {/* here we can use
-              t('delete-user') 
-              same goes for all files.
-            */}
+          <TouchableOpacity
+            testID="add-user-delete-button"
+            onPress={onDelete}
+            style={styles.deleteButton}
+          >
             <Text style={styles.deleteText}>{t.labels['delete-user']}</Text>
           </TouchableOpacity>
         )}
 
         <AppButton
+          testID="add-user-save-button"
           disabled={!isValid}
           title={isEditMode ? t.labels['update-user'] : t.labels['create-user']}
           onPress={handleSubmit(onSave)}

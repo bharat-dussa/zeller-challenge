@@ -37,10 +37,12 @@ interface RenderItem extends SectionListRenderItemInfo<UserItem, UserSection> {
 interface UserListProps {
   role: UserRoleWithAll;
   searchQuery?: string;
+  testID?: string;
 }
 
 const renderItem = ({ item, index, navigation }: RenderItem) => (
   <TouchableOpacity
+    testID={`user-list-item-${item.id || item._id || index}`}
     style={styles.card}
     key={index}
     onPress={() =>
@@ -54,16 +56,27 @@ const renderItem = ({ item, index, navigation }: RenderItem) => (
         <Text style={styles.avatarText}>{item?.name?.charAt(0)}</Text>
       </View>
 
-      <Text style={styles.name}>{item?.name}</Text>
+      <Text testID={`user-list-item-name-${item.id || item._id || index}`} style={styles.name}>
+        {item?.name}
+      </Text>
     </View>
 
     {item?.role === 'Admin' ? (
-      <Text style={styles.role}>{item.role}</Text>
+      <Text
+        testID={`user-list-item-role-${item.id || item._id || index}`}
+        style={styles.role}
+      >
+        {item.role}
+      </Text>
     ) : null}
   </TouchableOpacity>
 );
 
-export const UserList: FC<UserListProps> = ({ role, searchQuery = '' }) => {
+export const UserList: FC<UserListProps> = ({
+  role,
+  searchQuery = '',
+  testID = 'user-list-section-list',
+}) => {
   const { onRefresh, refreshing, users, loading } = useUsers(role, searchQuery);
   const sections = useMemo(() => buildSections(users), [users]);
   const navigation = useAppNavigation();
@@ -74,6 +87,7 @@ export const UserList: FC<UserListProps> = ({ role, searchQuery = '' }) => {
 
   return (
     <SectionList
+      testID={testID}
       sections={sections}
       keyExtractor={item => item.id + item.name}
       refreshControl={
@@ -81,7 +95,9 @@ export const UserList: FC<UserListProps> = ({ role, searchQuery = '' }) => {
       }
       contentContainerStyle={styles.container}
       renderSectionHeader={({ section }) => (
-        <Text style={styles.letter}>{section.title}</Text>
+        <Text testID={`user-list-section-${section.title}`} style={styles.letter}>
+          {section.title}
+        </Text>
       )}
       renderItem={props => renderItem({ ...props, navigation })}
       ListEmptyComponent={NoData}

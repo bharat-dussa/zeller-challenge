@@ -55,13 +55,17 @@ const TabItem = ({
 
   return (
     <TouchableOpacity
+      testID={`tab-item-${index}`}
       onLayout={event => {
         setTabWidth(event.nativeEvent.layout.width);
       }}
       style={[styles.tab, { width: tabWidth }]}
       onPress={() => onPress(index)}
     >
-      <Animated.Text style={[styles.activeTabText, animatedTextStyle]}>
+      <Animated.Text
+        testID={`tab-item-label-${index}`}
+        style={[styles.activeTabText, animatedTextStyle]}
+      >
         {label}
       </Animated.Text>
     </TouchableOpacity>
@@ -130,9 +134,10 @@ export const TabBar = ({
   }));
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.tabsContainer, tabsStyle]}>
+    <View testID="tab-bar-container" style={styles.container}>
+      <Animated.View testID="tab-bar-tabs" style={[styles.tabsContainer, tabsStyle]}>
         <Animated.View
+          testID="tab-bar-indicator"
           style={[styles.indicator, { width: tabWidth }, indicatorStyle]}
         />
         {tabs.map((tab, index) => (
@@ -149,8 +154,9 @@ export const TabBar = ({
       </Animated.View>
 
       {search && isSearching ? (
-        <Animated.View style={searchStyle}>
+        <Animated.View testID="tab-bar-search-wrapper" style={searchStyle}>
           <TextInput
+            testID="tab-bar-search-input"
             placeholder="Search…"
             value={searchQuery}
             onChangeText={onSearch}
@@ -161,11 +167,13 @@ export const TabBar = ({
         </Animated.View>
       ) : null}
       {search ? (
-        <TouchableOpacity onPress={toggleSearch}>
+        <TouchableOpacity testID="tab-bar-search-toggle" onPress={toggleSearch}>
           {isSearching ? (
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text testID="tab-bar-search-cancel" style={styles.cancelText}>
+              Cancel
+            </Text>
           ) : (
-            <SearchIcon width={18} height={18} />
+            <SearchIcon testID="tab-bar-search-icon" width={18} height={18} />
           )}
         </TouchableOpacity>
       ) : null}

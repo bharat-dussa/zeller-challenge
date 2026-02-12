@@ -5,18 +5,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   onPress: () => void;
+  testID?: string;
 };
 
-export const FloatingButton = ({ onPress }: Props) => {
+export const FloatingButton = ({ onPress, testID = 'floating-button' }: Props) => {
   const { bottom } = useSafeAreaInsets();
 
   return (
     <TouchableOpacity
+      testID={testID}
       activeOpacity={0.85}
       onPress={onPress}
       style={[styles.fab, { bottom: bottom + 24 }]}
     >
-      <Text style={styles.plus}>+</Text>
+      <Text testID={`${testID}-icon`} style={styles.plus}>
+        +
+      </Text>
     </TouchableOpacity>
   );
 };
