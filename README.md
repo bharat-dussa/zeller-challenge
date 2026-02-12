@@ -5,17 +5,6 @@
 
 React Native app with offline-first data flow. GraphQL is used only as a remote sync source, while Realm is the single source of truth.
 
-## Note there are two folder structure
-
-for centralized arch approach 
-```sh 
-git checkout main
-```
-for feature based arch approach 
-
-```sh 
-git checkout feature-based-arch
-```
 
 ## Developed screens
 
