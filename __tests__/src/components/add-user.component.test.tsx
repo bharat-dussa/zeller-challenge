@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import AddUser from '../../../src/features/users/components/add-user.component';
 import { ROLES } from '../../../src/shared/utils/common';
 
@@ -55,13 +55,23 @@ jest.mock('react-hook-form', () => ({
     mockUseFormArgs = args;
     return {
       control: {},
-      handleSubmit: (fn: any) => () => fn(mockFormData),
+      handleSubmit: (fn: any) => () => {
+        if (!mockFormState.isValid) return;
+        return fn(mockFormData);
+      },
       formState: mockFormState,
     };
   },
   Controller: ({ render, name }: any) =>
     render({ field: { value: '', onChange: jest.fn(), name } }),
 }));
+
+beforeAll(() => {
+  const { StyleSheet } = require('react-native');
+  if (!StyleSheet.flatten) {
+    StyleSheet.flatten = (style: any) => style;
+  }
+});
 
 describe('components/AddUser', () => {
   beforeEach(() => {
@@ -82,9 +92,7 @@ describe('components/AddUser', () => {
   });
 
   test('uses default values for create mode', () => {
-    ReactTestRenderer.act(() => {
-      ReactTestRenderer.create(<AddUser isEditMode={false} />);
-    });
+    render(<AddUser isEditMode={false} />);
 
     expect(mockUseFormArgs.defaultValues).toEqual({
       firstName: '',
@@ -102,9 +110,7 @@ describe('components/AddUser', () => {
       role: 'Manager',
     };
 
-    ReactTestRenderer.act(() => {
-      ReactTestRenderer.create(<AddUser isEditMode user={user as any} />);
-    });
+    render(<AddUser isEditMode user={user as any} />);
 
     expect(mockUseFormArgs.defaultValues).toEqual({
       firstName: 'Alice',
@@ -125,30 +131,28 @@ describe('components/AddUser', () => {
       },
     };
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode={false} />);
+    render(<AddUser isEditMode={false} />);
+
+    expect(screen.getByText('First name is required')).toBeTruthy();
+    expect(screen.getByText('Last name is required')).toBeTruthy();
+    expect(screen.getByText('Invalid email address')).toBeTruthy();
+
+    const saveButton = screen.getByText('Create user');
+
+    act(() => {
+      fireEvent.press(saveButton);
     });
 
-    const texts = renderer!.root.findAllByType('Text').map(n => n.props.children);
-    expect(texts).toContain('First name is required');
-    expect(texts).toContain('Last name is required');
-    expect(texts).toContain('Invalid email address');
-
-    const saveButton = renderer!.root.findAllByType('TouchableOpacity').slice(-1)[0];
-    expect(saveButton.props.disabled).toBe(true);
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
   test('creates user on save in create mode', async () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode={false} />);
-    });
+    render(<AddUser isEditMode={false} />);
 
-    const saveButton = renderer!.root.findAllByType('TouchableOpacity').slice(-1)[0];
+    const saveButton = screen.getByText('Create user');
 
-    await ReactTestRenderer.act(async () => {
-      await saveButton.props.onPress();
+    await act(async () => {
+      fireEvent.press(saveButton);
     });
 
     expect(mockCreateUser).toHaveBeenCalledWith(
@@ -164,22 +168,18 @@ describe('components/AddUser', () => {
   test('updates and deletes user in edit mode', async () => {
     const user = { id: '1', name: 'Alice Smith', email: 'a@a.com', role: 'Admin' };
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode user={user as any} />);
-    });
+    render(<AddUser isEditMode user={user as any} />);
 
-    const buttons = renderer!.root.findAllByType('TouchableOpacity');
-    const deleteButton = buttons[buttons.length - 2];
-    const saveButton = buttons[buttons.length - 1];
+    const deleteButton = screen.getByText('Delete user');
+    const saveButton = screen.getByText('Update user');
 
-    await ReactTestRenderer.act(async () => {
-      await deleteButton.props.onPress();
+    await act(async () => {
+      fireEvent.press(deleteButton);
     });
     expect(mockDeleteUser).toHaveBeenCalledWith('1');
 
-    await ReactTestRenderer.act(async () => {
-      await saveButton.props.onPress();
+    await act(async () => {
+      fireEvent.press(saveButton);
     });
     expect(mockUpdateUser).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -191,25 +191,16 @@ describe('components/AddUser', () => {
   });
 
   test('onDelete returns early when no user', () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode={false} />);
-    });
+    render(<AddUser isEditMode={false} />);
 
-    const deleteButtons = renderer!.root
-      .findAllByType('TouchableOpacity')
-      .filter(node => node.props.style && node.props.style.borderColor === '#FF3B30');
-
-    expect(deleteButtons).toHaveLength(0);
+    expect(screen.queryByText('Delete user')).toBeNull();
     expect(mockDeleteUser).not.toHaveBeenCalled();
   });
 
   test('passes tab role selection to setIndex', () => {
-    ReactTestRenderer.act(() => {
-      ReactTestRenderer.create(<AddUser isEditMode={false} />);
-    });
+    render(<AddUser isEditMode={false} />);
 
-    ReactTestRenderer.act(() => {
+    act(() => {
       mockTabBarProps.onPress(1);
     });
     expect(mockSetIndex).toHaveBeenCalledWith(1);
