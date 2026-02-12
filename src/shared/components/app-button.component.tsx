@@ -1,15 +1,145 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle
+} from 'react-native';
 import { colors } from '../utils/color.util';
+import { Loader } from './loader.component';
 
-const AppButton = ({ onPress }) => {
-  return <TouchableOpacity style={styles.buttonContainer} onPress={onPress} />;
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'label';
+
+export type AppButtonProps = {
+  title: string;
+  onPress?: () => void;
+
+  variant?: ButtonVariant;
+  loading?: boolean;
+  disabled?: boolean;
+  fullWidth?: boolean;
+
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+};
+
+export const AppButton = ({
+  title,
+  onPress,
+  variant = 'primary',
+  loading = false,
+  disabled = false,
+  fullWidth = true,
+  leftIcon,
+  rightIcon,
+  style,
+  textStyle,
+}: AppButtonProps) => {
+  const isDisabled = disabled || loading;
+
+  const containerStyles = [
+    styles.base,
+    fullWidth && styles.fullWidth,
+    styles[variant],
+    isDisabled && styles.disabled,
+    style,
+  ];
+
+  const textStyles = [
+    styles.textBase,
+    styles[`${variant}Text` as keyof typeof styles],
+    isDisabled && styles.disabledText,
+    textStyle,
+  ];
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      disabled={isDisabled}
+      style={containerStyles}
+    >
+      {loading ? (
+        <Loader />
+      ) : (
+        <View style={styles.content}>
+          {leftIcon}
+          <Text style={textStyles}>{title}</Text>
+          {rightIcon}
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 };
 
 const styles = StyleSheet.create({
-  buttonContainer: {
+  base: {
+    paddingVertical: 14,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  fullWidth: {
+    width: '100%',
+  },
+
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  textBase: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  primary: {
     backgroundColor: colors.primary,
   },
-});
 
-export default AppButton;
+  primaryText: {
+    color: colors.cardBackground,
+  },
+
+  secondary: {
+    backgroundColor: colors.tabBackground,
+  },
+
+  secondaryText: {
+    color: colors.primary,
+  },
+
+  outline: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: 'transparent',
+  },
+
+  outlineText: {
+    color: colors.primary,
+  },
+
+  label: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+  },
+
+  labelText: {
+    color: colors.primary,
+  },
+
+  disabled: {
+    opacity: 0.5,
+  },
+
+  disabledText: {
+    opacity: 0.7,
+  },
+});

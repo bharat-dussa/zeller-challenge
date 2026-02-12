@@ -16,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { colors } from '../utils/color.util';
+import { t } from '../utils/t';
 import SearchIcon from './icons/search.icon';
 
 type TabItemProps = {
@@ -25,6 +26,15 @@ type TabItemProps = {
   animatedIndex: SharedValue<number>;
   onPress: (index: number) => void;
   setTabWidth: (width: number) => void;
+};
+
+type TabBarProps = {
+  animatedIndex: SharedValue<number>;
+  tabs: readonly string[];
+  onPress: (idx: number) => void;
+  search?: boolean;
+  searchQuery?: string;
+  onSearch?: (text: string) => void;
 };
 
 const TabItem = ({
@@ -65,20 +75,13 @@ export const TabBar = ({
   search,
   searchQuery,
   onSearch,
-}: {
-  animatedIndex: SharedValue<number>;
-  tabs: string[];
-  onPress: (idx: SharedValue<number>) => void;
-  search?: boolean;
-  searchQuery?: string;
-  onSearch?: (text: string) => void;
-}) => {
+}: TabBarProps) => {
   const [tabWidth, setTabWidth] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
   const searchProgress = useSharedValue(0); // 0 - tabs, 1 -search
 
   if (!animatedIndex) {
-    throw new Error('Index is required');
+    throw new Error(t.error['index-required']);
   }
 
   const toggleSearch = () => {
@@ -103,7 +106,7 @@ export const TabBar = ({
 
   const handlePress = (tabIndex: number) => {
     animatedIndex.value = tabIndex;
-    onPress?.(tabIndex as unknown as SharedValue<number>);
+    onPress?.(tabIndex);
   };
 
   const tabsStyle = useAnimatedStyle(() => ({
@@ -134,7 +137,7 @@ export const TabBar = ({
         />
         {tabs.map((tab, index) => (
           <TabItem
-            key={tab}
+            key={`${tab}-${index}`}
             label={tab}
             index={index}
             tabWidth={tabWidth}

@@ -7,7 +7,7 @@ describe('hooks/use-tab-index', () => {
     let current: any;
 
     const HookTester = () => {
-      const [index, setIndex] = useTabIndex(0);
+      const { index, setIndex } = useTabIndex(0);
       current = { index, setIndex };
       return null;
     };
@@ -25,7 +25,7 @@ describe('hooks/use-tab-index', () => {
     let current: any;
 
     const HookTester = () => {
-      const [index, setIndex] = useTabIndex(2);
+      const { index, setIndex } = useTabIndex(2);
       current = { index, setIndex };
       return null;
     };

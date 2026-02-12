@@ -7,8 +7,8 @@ export const useTabIndex = (initialIndex = 0) => {
     index.value = next;
   };
 
-  return [
+  return {
     index,
     setIndex
-  ];
+  };
 };

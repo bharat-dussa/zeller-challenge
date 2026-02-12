@@ -1,9 +1,9 @@
-import { UserListItemVM, ZellerCustomer } from '../../../../shared/services/graphql/types';
-import { UserRole } from '../../../../shared/models/user.models';
+import { UserRoleWithAll } from '../../../../../shared/models/user.models';
+import { ZellerCustomer } from '../../../../../shared/services/graphql/types';
 
 export const filterUsersByRole = (
   users: ZellerCustomer[],
-  role?: UserRole & 'All'
+  role?: UserRoleWithAll
 ): ZellerCustomer[] => {
   if (!role) return users;
   if(role === 'All') return users;
@@ -24,11 +24,11 @@ export const searchUsersByName = (
 
 export const mapUsersToListItems = (
   users: ZellerCustomer[]
-): UserListItemVM[] => {
+): ZellerCustomer[] => {
   return users.map(user => ({
     id: user?._id || user.id || '',
     name: String(user.name) || '',
-    role: String(user.role) || '',
+    role: user.role || '',
     email: user.email,
     letter: String(user?.name?.charAt(0).toUpperCase()),
   }));

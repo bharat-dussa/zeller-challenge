@@ -14,12 +14,12 @@ export const toRealmUser = (user: ZellerCustomer) => ({
 });
 
 export const fromRealmUser = (u: UserEntity): ZellerCustomer => ({
-  id: u._id,
+  id: String(u._id),
   name: u.name,
   email: u.email,
   firstName: u.name,
   lastName: u.name,
-  role: u.role as ZellerCustomer['role'],
+  role: u.role,
 });
 
 export class RealmService implements IRealmService {
@@ -38,10 +38,9 @@ export class RealmService implements IRealmService {
     return new RealmService(realmInstance);
   }
 
-  async createUser(data: ZellerCustomer): Promise<ZellerCustomer> {
-    let created!: ZellerCustomer;
+  async createUser(data: ZellerCustomer): Promise< Omit<ZellerCustomer, 'id'>> {
+    let created!: Omit<ZellerCustomer, 'id'>;
     this.realm.write(() => {
-      //@ts-ignore
       created = this.realm.create('User', toRealmUser(data));
     });
     return created!;

@@ -5,7 +5,7 @@ export type ZellerCustomer = {
   id: string;
   name?: string;
   email?: string | null;
-  role?: UserRole;
+  role: UserRole;
   firstName?: string;
   lastName?: string;
 };
@@ -16,7 +16,7 @@ export type ZellerCustomerConnection = {
 };
 
 export type UserListItemVM = {
-  _id: string;
+  _id?: string;
   id: string;
   name: string;
   role: string;

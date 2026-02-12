@@ -1,7 +1,7 @@
 import React from 'react';
 import AddUser from '../components/add-user.component';
-import { ZellerCustomer } from '../../shared/services/graphql/types';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import { ZellerCustomer } from '../../../shared/services/graphql/types';
 
 type AddUserRouteParams = {
   user?: ZellerCustomer;

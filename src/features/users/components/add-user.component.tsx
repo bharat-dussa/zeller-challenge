@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigation } from '@react-navigation/native';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   StyleSheet,
@@ -11,15 +10,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRealmService } from '../../../app/providers/realm-service.context';
+import { AppButton } from '../../../shared/components/app-button.component';
+import { AppBottomSheet } from '../../../shared/components/app-modal.component';
+import CloseIcon from '../../../shared/components/icons/close.icon';
+import { TabBar } from '../../../shared/components/tab-bar.component';
+import { useAppNavigation } from '../../../shared/hooks/use-app-navigation.hook';
 import { useTabIndex } from '../../../shared/hooks/use-tab-index.hook';
 import { ZellerCustomer } from '../../../shared/services/graphql/types';
 import { colors } from '../../../shared/utils/color.util';
 import { getRandomUuid, ROLES } from '../../../shared/utils/common';
+import { t } from '../../../shared/utils/t';
 import { AddUserForm, addUserSchema } from '../validation/user-form.schema';
-import CloseIcon from '../../../shared/components/icons/close.icon';
-import { TabBar } from '../../../shared/components/tab-bar.component';
-import { SharedValue } from 'react-native-reanimated';
-import { UserRole } from '../../../shared/models/user.models';
+import { BottomSheetContent } from './bottom-sheet-content.component';
 
 interface AddUserProps {
   isEditMode: boolean;
@@ -27,51 +29,72 @@ interface AddUserProps {
 }
 
 export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
-  const [index, setIndex] = useTabIndex(0);
-  const navigation = useNavigation();
+  // This is required since we are using shared value in useTabIndex.
+  const initialIndex =
+    user?.role && ROLES.includes(user.role) ? ROLES.indexOf(user.role) : 0;
+
+  const { index, setIndex } = useTabIndex(initialIndex);
+  const [isShowBottomsheet, setIsShowBottomsheet] = useState(false);
+  const [isDeleteClicked, setIsDeleteClicked] = useState(false);
+  const navigation = useAppNavigation();
 
   const {
     control,
     handleSubmit,
+    trigger,
+    setValue,
     formState: { errors, isValid },
   } = useForm<AddUserForm>({
     resolver: zodResolver(addUserSchema),
-    mode: 'onChange',
+    mode: 'all',
     defaultValues: {
       firstName: user?.name?.split(' ')[0] || '',
       lastName: user?.name?.split(' ').slice(1).join(' ') || '',
       email: user?.email || '',
-      roleIndex: user ? ROLES.indexOf(String(user.role)) : 0,
+      role: user?.role || '',
     },
   });
 
+  const handleBottomSheetState = (isOpen: boolean) =>
+    setIsShowBottomsheet(isOpen);
+
+  const onCloseBottomSheet = () => handleBottomSheetState(false);
+
   const onClose = () => {
-    //@ts-ignore
-    navigation.pop();
+    if (isEditMode && !isValid) {
+      setIsShowBottomsheet(true);
+    } else {
+      onCloseBottomSheet();
+      navigation.goBack();
+    }
   };
-  const onPressRole = (idx: SharedValue<number>) => {
-    //@ts-ignore
+  const onPressRole = (idx: number) => {
+    setValue('role', ROLES[idx], { shouldValidate: true });
     setIndex(idx);
   };
 
   const service = useRealmService();
 
-  const onDelete = async () => {
-    if (!user) return;
+  const handleDeleteUser = async (_user: AddUserProps['user']) => {
+    if (!_user) return;
 
-    await service.deleteUser(user.id);
+    await service.deleteUser(_user.id);
     onClose();
   };
 
+  const onDelete = () => {
+    setIsDeleteClicked(true);
+    handleBottomSheetState(true);
+  };
+
   const onSave = async (data: AddUserForm) => {
-    data.roleIndex = (index as SharedValue<number>).value;
     const newUser: ZellerCustomer = {
       id: isEditMode ? user?.id || user?._id || '' : getRandomUuid(),
       name: `${data.firstName} ${data.lastName}`.trim(),
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      role: ROLES[(index as SharedValue<number>).value] as UserRole,
+      role: ROLES[index.value],
     };
 
     if (isEditMode) {
@@ -79,16 +102,14 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
     } else {
       await service.createUser(newUser);
     }
-
     onClose();
   };
 
-  React.useEffect(() => {
-    if (user) {
-      //@ts-ignore
-      setIndex(ROLES.indexOf(user.role) as unknown as SharedValue<number>);
+  useEffect(() => {
+    if (isEditMode) {
+      trigger();
     }
-  }, [setIndex, user]);
+  }, [isEditMode, trigger]);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer} edges={['top', 'bottom']}>
@@ -98,7 +119,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.newUser}>New User</Text>
+          <Text style={styles.newUser}>{t.labels['new-user-cap']}</Text>
         </View>
         <View style={styles.content}>
           <Controller
@@ -107,7 +128,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             render={({ field }) => (
               <>
                 <TextInput
-                  placeholder="First name"
+                  placeholder={t.labels['first-name']}
                   style={styles.input}
                   onChangeText={field.onChange}
                   value={field.value}
@@ -125,7 +146,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             render={({ field }) => (
               <>
                 <TextInput
-                  placeholder="Last name"
+                  placeholder={t.labels['last-name']}
                   style={styles.input}
                   onChangeText={field.onChange}
                   value={field.value}
@@ -143,7 +164,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             render={({ field }) => (
               <>
                 <TextInput
-                  placeholder="Email"
+                  placeholder={t.labels.email}
                   style={styles.input}
                   autoCapitalize="none"
                   keyboardType="email-address"
@@ -157,29 +178,57 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
             )}
           />
 
-          <Text style={styles.label}>User Role</Text>
-          <TabBar
-            animatedIndex={index as SharedValue<number>}
-            tabs={ROLES}
-            onPress={onPressRole}
-          />
+          <Text style={styles.label}>{t.labels['user-role-cap']}</Text>
+          <TabBar animatedIndex={index} tabs={ROLES} onPress={onPressRole} />
         </View>
 
         {isEditMode && (
           <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-            <Text style={styles.deleteText}>Delete user</Text>
+            {/* here we can use
+              t('delete-user') 
+              same goes for all files.
+            */}
+            <Text style={styles.deleteText}>{t.labels['delete-user']}</Text>
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity
-          onPress={handleSubmit(onSave)}
-          style={[styles.saveButton, !isValid && styles.saveButtonDisabled]}
+        <AppButton
           disabled={!isValid}
-        >
-          <Text style={styles.saveText}>
-            {isEditMode ? 'Update' : 'Create'} user
-          </Text>
-        </TouchableOpacity>
+          title={isEditMode ? t.labels['update-user'] : t.labels['create-user']}
+          onPress={handleSubmit(onSave)}
+        />
+
+        <AppBottomSheet
+          visible={isShowBottomsheet}
+          onClose={onCloseBottomSheet}
+          children={
+            <BottomSheetContent
+              title={
+                isValid && isDeleteClicked
+                  ? t.messages['delete-user-prompt']
+                  : t.messages['please-clear-form-errors']
+              }
+              secondaryButtonProps={
+                !isValid && !isDeleteClicked
+                  ? undefined
+                  : {
+                      title: t.labels.delete,
+                      variant: 'label',
+                      textStyle: { color: colors.error },
+                      onPress: () => handleDeleteUser(user),
+                    }
+              }
+              primaryButtonProps={
+                !isValid && !isDeleteClicked
+                  ? undefined
+                  : {
+                      title: t.labels.cancel,
+                      onPress: onCloseBottomSheet,
+                    }
+              }
+            />
+          }
+        />
       </View>
     </SafeAreaView>
   );
@@ -191,25 +240,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 14,
   },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.inputBorder,
+  contentContainer: {
+    gap: 40,
+    justifyContent: 'center',
   },
-
-  close: {
-    color: colors.primary,
-    fontSize: 16,
-    width: 60,
-  },
-
   closeIcon: { marginLeft: 6, marginBottom: 30 },
-
   newUser: { fontWeight: '600', fontSize: 16 },
+  modalText: { fontWeight: '600' },
   title: {
     flex: 1,
     textAlign: 'center',
@@ -300,6 +337,10 @@ const styles = StyleSheet.create({
 
   saveButtonDisabled: {
     opacity: 0.5,
+  },
+
+  buttonContainer: {
+    paddingHorizontal: 10,
   },
 });
 
