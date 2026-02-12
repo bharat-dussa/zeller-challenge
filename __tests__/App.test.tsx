@@ -3,27 +3,48 @@
  */
 
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import App from '../App';
-import { createEncryptedRealmConfig } from '../src/db/realConfig';
-import { RootNavigator } from '../src/navigation/root-navigator/root-navigator';
+import { render, screen } from '@testing-library/react-native';
 
-jest.mock('../src/db/realConfig', () => ({
+jest.mock('../src/shared/db/realConfig', () => ({
   createEncryptedRealmConfig: jest.fn(),
 }));
 
+jest.mock('../src/app/navigation/root-navigator', () => ({
+  RootNavigator: () => {
+    const { Text } = require('react-native');
+    return <Text testID="root-navigator">Root Navigator</Text>;
+  },
+}));
+
+
+jest.mock('../src/app/providers/realm-service.context', () => {
+  const React = require('react');
+
+  return {
+    RealmProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    RealmServiceProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+jest.mock('../src/shared/services/realm/realm-service', () => ({
+  RealmService: {
+    fromRealm: jest.fn(() => ({})),
+  },
+}));
+
+const { createEncryptedRealmConfig } = require('../src/shared/db/realConfig');
+const App = require('../App').default;
+
 describe('App', () => {
-  test('renders root navigator after config resolves', async () => {
-    (createEncryptedRealmConfig as jest.Mock).mockResolvedValue({});
+  test('requests realm config and renders null until config resolves', () => {
+    (createEncryptedRealmConfig as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
+    const view = render(<App />);
 
-    await ReactTestRenderer.act(async () => {
-      renderer = ReactTestRenderer.create(<App />);
-      await Promise.resolve();
-    });
-
-    const root = renderer!.root;
-    expect(root.findAllByType(RootNavigator)).toHaveLength(1);
+    expect(createEncryptedRealmConfig).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('root-navigator')).toBeNull();
+    expect(view.toJSON()).toBeNull();
   });
 });

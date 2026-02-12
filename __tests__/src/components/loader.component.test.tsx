@@ -1,14 +1,11 @@
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import { Loader } from '../../../src/components/loader.component';
+import { render, screen } from '@testing-library/react-native';
+import { Loader } from '../../../src/shared/components/loader.component';
 
 describe('components/Loader', () => {
   test('renders loading text', () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<Loader />);
-    });
-    const text = renderer!.root.findByType('Text');
-    expect(text.props.children).toBe('Loading...');
+    render(<Loader />);
+    expect(screen.getByTestId('loader-container')).toBeTruthy();
+    expect(screen.getByTestId('loader-text').props.children).toBe('Loading...');
   });
 });

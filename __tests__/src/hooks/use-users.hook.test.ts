@@ -1,18 +1,18 @@
-import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import { useUsers } from '../../../src/hooks/use-users.hook';
-import { fetchUsers } from '../../../src/services/api/users/user.api';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { useUsers } from '../../../src/features/users/hooks/use-users.hook';
+import { fetchUsers } from '../../../src/features/users/services/api/users/user.api';
 import {
   useQuery,
   useRealmService,
-} from '../../../src/context/realm-service.context';
+} from '../../../src/app/providers/realm-service.context';
+import { t } from '../../../src/shared/utils/t';
 
-jest.mock('../../../src/context/realm-service.context', () => ({
+jest.mock('../../../src/app/providers/realm-service.context', () => ({
   useQuery: jest.fn(),
   useRealmService: jest.fn(),
 }));
 
-jest.mock('../../../src/services/api/users/user.api', () => ({
+jest.mock('../../../src/features/users/services/api/users/user.api', () => ({
   fetchUsers: jest.fn(),
 }));
 
@@ -29,86 +29,65 @@ describe('hooks/use-users', () => {
       { id: '3', name: 'Cara', role: 'Admin', email: 'c@a.com' },
     ]);
     createMutliUsers.mockClear();
+    (fetchUsers as jest.Mock).mockClear();
   });
 
-  test('loads users on mount and maps list', async () => {
-    let state: any;
+  test('loads users on mount and maps list by role', async () => {
+    const { result } = renderHook(() => useUsers('Admin', ''));
 
-    const HookTester = () => {
-      state = useUsers('Admin', '');
-      return null;
-    };
-
-    await ReactTestRenderer.act(async () => {
-      ReactTestRenderer.create(React.createElement(HookTester));
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(fetchUsers).toHaveBeenCalledTimes(1);
     });
 
-    expect(fetchUsers).toHaveBeenCalled();
-    expect(createMutliUsers).toHaveBeenCalled();
-    expect(state.users).toHaveLength(1);
+    expect(createMutliUsers).toHaveBeenCalledWith([
+      { id: '3', name: 'Cara', role: 'Admin', email: 'c@a.com' },
+    ]);
+    expect(result.current.users).toHaveLength(1);
+    expect(result.current.users[0].name).toBe('Alice');
   });
 
-  test('sets error on load failure', async () => {
+  test('sets default error on initial load failure', async () => {
     (fetchUsers as jest.Mock).mockRejectedValueOnce(new Error('fail'));
-    let state: any;
 
-    const HookTester = () => {
-      state = useUsers();
-      return null;
-    };
+    const { result } = renderHook(() => useUsers());
 
-    await ReactTestRenderer.act(async () => {
-      ReactTestRenderer.create(React.createElement(HookTester));
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(result.current.error).toBe(t.error['load-users']);
     });
-
-    expect(state.error).toBe('Unable to load users');
   });
 
-  test('onRefresh updates refreshing state', async () => {
-    let state: any;
+  test('refreshes users and resets refreshing state', async () => {
+    const { result } = renderHook(() => useUsers());
 
-    const HookTester = () => {
-      state = useUsers();
-      return null;
-    };
-
-    await ReactTestRenderer.act(async () => {
-      ReactTestRenderer.create(React.createElement(HookTester));
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(fetchUsers).toHaveBeenCalledTimes(1);
     });
 
-    await ReactTestRenderer.act(async () => {
-      await state.onRefresh();
+    await act(async () => {
+      await result.current.onRefresh();
     });
 
-    expect(createMutliUsers).toHaveBeenCalled();
-    expect(state.refreshing).toBe(false);
+    expect(fetchUsers).toHaveBeenCalledTimes(2);
+    expect(createMutliUsers).toHaveBeenCalledTimes(2);
+    expect(result.current.refreshing).toBe(false);
   });
 
-  test('onRefresh sets error message on failure', async () => {
+  test('sets refresh error message when refresh fails', async () => {
     (fetchUsers as jest.Mock)
-      .mockResolvedValueOnce([{ id: '3', name: 'Cara', role: 'Admin' }])
+      .mockResolvedValueOnce([{ id: '3', name: 'Cara', role: 'Admin', email: 'c@a.com' }])
       .mockRejectedValueOnce(new Error('network down'));
 
-    let state: any;
+    const { result } = renderHook(() => useUsers());
 
-    const HookTester = () => {
-      state = useUsers();
-      return null;
-    };
-
-    await ReactTestRenderer.act(async () => {
-      ReactTestRenderer.create(React.createElement(HookTester));
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(fetchUsers).toHaveBeenCalledTimes(1);
     });
 
-    await ReactTestRenderer.act(async () => {
-      await state.onRefresh();
+    await act(async () => {
+      await result.current.onRefresh();
     });
 
-    expect(state.error).toBe('network down');
-    expect(state.refreshing).toBe(false);
+    expect(result.current.error).toBe('network down');
+    expect(result.current.refreshing).toBe(false);
   });
 });

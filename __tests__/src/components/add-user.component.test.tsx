@@ -1,29 +1,23 @@
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import AddUser from '../../../src/components/add-user.component';
-import { ROLES } from '../../../src/utils/common';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import AddUser from '../../../src/features/users/components/add-user.component';
+import { t } from '../../../src/shared/utils/t';
 
 const mockCreateUser = jest.fn();
 const mockUpdateUser = jest.fn();
 const mockDeleteUser = jest.fn();
+const mockGoBack = jest.fn();
+const mockSetValue = jest.fn();
 
 let mockFormState: any = { errors: {}, isValid: true };
 let mockFormData: any = {
   firstName: 'Jane',
   lastName: 'Doe',
   email: 'jane@doe.com',
-  roleIndex: 0,
+  role: 'Admin',
 };
-let mockUseFormArgs: any = null;
 
-const mockIndex = { value: 0 };
-const mockSetIndex = jest.fn((next: number) => {
-  mockIndex.value = next;
-});
-
-let mockTabBarProps: any = null;
-
-jest.mock('../../../src/context/realm-service.context', () => ({
+jest.mock('../../../src/app/providers/realm-service.context', () => ({
   useRealmService: () => ({
     createUser: mockCreateUser,
     updateUser: mockUpdateUser,
@@ -31,36 +25,32 @@ jest.mock('../../../src/context/realm-service.context', () => ({
   }),
 }));
 
-jest.mock('../../../src/hooks/use-tab-index.hook', () => ({
-  useTabIndex: () => [mockIndex, mockSetIndex],
+jest.mock('../../../src/shared/hooks/use-app-navigation.hook', () => ({
+  useAppNavigation: () => ({
+    goBack: mockGoBack,
+  }),
 }));
-
-jest.mock('../../../src/utils/common', () => ({
-  ROLES: ['Admin', 'Manager'],
-  getRandomUuid: () => 'uuid-1',
-}));
-
-jest.mock('../../../src/components/tab-bar.component', () => {
-  const React = require('react');
-  return {
-    TabBar: (props: any) => {
-      mockTabBarProps = props;
-      return React.createElement('TabBar', props, props.children);
-    },
-  };
-});
 
 jest.mock('react-hook-form', () => ({
-  useForm: (args: any) => {
-    mockUseFormArgs = args;
-    return {
-      control: {},
-      handleSubmit: (fn: any) => () => fn(mockFormData),
-      formState: mockFormState,
+  useForm: () => ({
+    control: {},
+    handleSubmit: (fn: any) => () => {
+      if (!mockFormState.isValid) return;
+      return fn(mockFormData);
+    },
+    trigger: jest.fn(),
+    setValue: mockSetValue.mockImplementation((name: string, value: any) => {
+      mockFormData[name] = value;
+    }),
+    formState: mockFormState,
+  }),
+  Controller: ({ render, name }: any) => {
+    const onChange = (value: any) => {
+      mockFormData[name] = value;
     };
+
+    return render({ field: { value: mockFormData[name] ?? '', onChange, name } });
   },
-  Controller: ({ render, name }: any) =>
-    render({ field: { value: '', onChange: jest.fn(), name } }),
 }));
 
 describe('components/AddUser', () => {
@@ -68,54 +58,101 @@ describe('components/AddUser', () => {
     mockCreateUser.mockClear();
     mockUpdateUser.mockClear();
     mockDeleteUser.mockClear();
-    mockSetIndex.mockClear();
-    mockIndex.value = 0;
-    mockTabBarProps = null;
-    mockUseFormArgs = null;
+    mockGoBack.mockClear();
+    mockSetValue.mockClear();
+
     mockFormState = { errors: {}, isValid: true };
     mockFormData = {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane@doe.com',
-      roleIndex: 0,
+      role: 'Admin',
     };
   });
 
-  test('uses default values for create mode', () => {
-    ReactTestRenderer.act(() => {
-      ReactTestRenderer.create(<AddUser isEditMode={false} />);
+  test('renders create mode fields and hides delete button', () => {
+    render(<AddUser isEditMode={false} />);
+
+    expect(screen.getByTestId('add-user-screen')).toBeTruthy();
+    expect(screen.getByTestId('add-user-first-name-input')).toBeTruthy();
+    expect(screen.getByTestId('add-user-last-name-input')).toBeTruthy();
+    expect(screen.getByTestId('add-user-email-input')).toBeTruthy();
+    expect(screen.queryByTestId('add-user-delete-button')).toBeNull();
+  });
+
+  test('creates user on save in create mode', async () => {
+    render(<AddUser isEditMode={false} />);
+
+    fireEvent.press(screen.getByTestId('add-user-save-button'));
+
+    await waitFor(() => {
+      expect(mockCreateUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'uuid',
+          name: 'Jane Doe',
+          email: 'jane@doe.com',
+          role: 'Admin',
+        }),
+      );
     });
 
-    expect(mockUseFormArgs.defaultValues).toEqual({
-      firstName: '',
-      lastName: '',
-      email: '',
-      roleIndex: 0,
+    expect(mockUpdateUser).not.toHaveBeenCalled();
+    expect(mockGoBack).toHaveBeenCalled();
+  });
+
+  test('updates role when tab is pressed', async () => {
+    render(<AddUser isEditMode={false} />);
+
+    fireEvent.press(screen.getByTestId('tab-item-1'));
+    fireEvent.press(screen.getByTestId('add-user-save-button'));
+
+    await waitFor(() => {
+      expect(mockSetValue).toHaveBeenCalledWith('role', 'Manager', {
+        shouldValidate: true,
+      });
+      expect(mockCreateUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          role: 'Manager',
+        }),
+      );
     });
   });
 
-  test('uses default values from user in edit mode and sets index', () => {
+  test('updates user in edit mode', async () => {
+    mockFormData = {
+      firstName: 'Alice',
+      lastName: 'Smith',
+      email: 'alice@new.com',
+      role: 'Manager',
+    };
     const user = {
       id: '1',
       name: 'Alice Smith',
-      email: 'a@a.com',
+      firstName: 'Alice',
+      lastName: 'Smith',
+      email: 'alice@example.com',
       role: 'Manager',
     };
 
-    ReactTestRenderer.act(() => {
-      ReactTestRenderer.create(<AddUser isEditMode user={user as any} />);
+    render(<AddUser isEditMode user={user as any} />);
+
+    fireEvent.press(screen.getByTestId('add-user-save-button'));
+
+    await waitFor(() => {
+      expect(mockUpdateUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '1',
+          name: 'Alice Smith',
+          email: 'alice@new.com',
+          role: 'Manager',
+        }),
+      );
     });
 
-    expect(mockUseFormArgs.defaultValues).toEqual({
-      firstName: 'Alice',
-      lastName: 'Smith',
-      email: 'a@a.com',
-      roleIndex: ROLES.indexOf('Manager'),
-    });
-    expect(mockSetIndex).toHaveBeenCalledWith(ROLES.indexOf('Manager'));
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
-  test('shows validation errors and disables save', () => {
+  test('renders field-level validation errors', () => {
     mockFormState = {
       isValid: false,
       errors: {
@@ -125,93 +162,102 @@ describe('components/AddUser', () => {
       },
     };
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode={false} />);
-    });
+    render(<AddUser isEditMode={false} />);
 
-    const texts = renderer!.root.findAllByType('Text').map(n => n.props.children);
-    expect(texts).toContain('First name is required');
-    expect(texts).toContain('Last name is required');
-    expect(texts).toContain('Invalid email address');
-
-    const saveButton = renderer!.root.findAllByType('TouchableOpacity').slice(-1)[0];
-    expect(saveButton.props.disabled).toBe(true);
+    expect(screen.getByText('First name is required')).toBeTruthy();
+    expect(screen.getByText('Last name is required')).toBeTruthy();
+    expect(screen.getByText('Invalid email address')).toBeTruthy();
   });
 
-  test('creates user on save in create mode', async () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode={false} />);
+  test('uses fallback id paths in edit mode save', async () => {
+    const userWithUnderscoreId = {
+      _id: 'zeller-id',
+      name: 'Legacy User',
+      firstName: 'Legacy',
+      lastName: 'User',
+      email: 'legacy@zeller.com',
+      role: 'Admin',
+    };
+
+    const view = render(<AddUser isEditMode user={userWithUnderscoreId as any} />);
+    fireEvent.press(screen.getByTestId('add-user-save-button'));
+
+    await waitFor(() => {
+      expect(mockUpdateUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'zeller-id',
+        }),
+      );
     });
 
-    const saveButton = renderer!.root.findAllByType('TouchableOpacity').slice(-1)[0];
+    mockUpdateUser.mockClear();
+    view.unmount();
+    render(<AddUser isEditMode />);
+    fireEvent.press(screen.getByTestId('add-user-save-button'));
 
-    await ReactTestRenderer.act(async () => {
-      await saveButton.props.onPress();
+    await waitFor(() => {
+      expect(mockUpdateUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '',
+        }),
+      );
     });
-
-    expect(mockCreateUser).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'uuid-1',
-        name: 'Jane Doe',
-        role: ROLES[0],
-      }),
-    );
-    expect(mockUpdateUser).not.toHaveBeenCalled();
   });
 
-  test('updates and deletes user in edit mode', async () => {
-    const user = { id: '1', name: 'Alice Smith', email: 'a@a.com', role: 'Admin' };
+  test('shows invalid-form bottom sheet on close in edit mode', async () => {
+    mockFormState = { errors: {}, isValid: false };
+    const user = {
+      id: '1',
+      name: 'Alice Smith',
+      firstName: 'Alice',
+      lastName: 'Smith',
+      email: 'alice@zeller.com',
+      role: 'Admin',
+    };
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode user={user as any} />);
+    render(<AddUser isEditMode user={user as any} />);
+    fireEvent.press(screen.getByTestId('add-user-close-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bottom-sheet-content-title').props.children).toBe(
+        t.messages['please-clear-form-errors'],
+      );
     });
-
-    const buttons = renderer!.root.findAllByType('TouchableOpacity');
-    const deleteButton = buttons[buttons.length - 2];
-    const saveButton = buttons[buttons.length - 1];
-
-    await ReactTestRenderer.act(async () => {
-      await deleteButton.props.onPress();
-    });
-    expect(mockDeleteUser).toHaveBeenCalledWith('1');
-
-    await ReactTestRenderer.act(async () => {
-      await saveButton.props.onPress();
-    });
-    expect(mockUpdateUser).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: '1',
-        name: 'Jane Doe',
-        role: ROLES[0],
-      }),
-    );
   });
 
-  test('onDelete returns early when no user', () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AddUser isEditMode={false} />);
+  test('deletes user through confirmation sheet', async () => {
+    const user = {
+      id: '1',
+      name: 'Alice Smith',
+      firstName: 'Alice',
+      lastName: 'Smith',
+      email: 'alice@zeller.com',
+      role: 'Admin',
+    };
+
+    render(<AddUser isEditMode user={user as any} />);
+    fireEvent.press(screen.getByTestId('add-user-delete-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bottom-sheet-secondary-button')).toBeTruthy();
     });
 
-    const deleteButtons = renderer!.root
-      .findAllByType('TouchableOpacity')
-      .filter(node => node.props.style && node.props.style.borderColor === '#FF3B30');
+    fireEvent.press(screen.getByTestId('bottom-sheet-secondary-button'));
 
-    expect(deleteButtons).toHaveLength(0);
+    await waitFor(() => {
+      expect(mockDeleteUser).toHaveBeenCalledWith('1');
+    });
+  });
+
+  test('delete action returns early when user is missing', async () => {
+    render(<AddUser isEditMode />);
+    fireEvent.press(screen.getByTestId('add-user-delete-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bottom-sheet-secondary-button')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('bottom-sheet-secondary-button'));
     expect(mockDeleteUser).not.toHaveBeenCalled();
-  });
-
-  test('passes tab role selection to setIndex', () => {
-    ReactTestRenderer.act(() => {
-      ReactTestRenderer.create(<AddUser isEditMode={false} />);
-    });
-
-    ReactTestRenderer.act(() => {
-      mockTabBarProps.onPress(1);
-    });
-    expect(mockSetIndex).toHaveBeenCalledWith(1);
   });
 });

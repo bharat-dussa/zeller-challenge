@@ -1,5 +1,5 @@
-import { SCHEMA } from '../../../../src/db/schemas';
-import { UserEntity } from '../../../../src/db/schemas/user.schemas';
+import { SCHEMA } from '../../../../src/shared/db/schemas';
+import { UserEntity } from '../../../../src/shared/db/schemas/user.schemas';
 
 describe('db/schemas/index', () => {
   test('exports schema list', () => {

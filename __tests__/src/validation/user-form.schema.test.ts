@@ -1,4 +1,4 @@
-import { addUserSchema } from '../../../src/validation/user-form.schema';
+import { addUserSchema } from '../../../src/features/users/validation/user-form.schema';
 
 describe('validation/user-form.schema', () => {
   test('accepts valid data', () => {
@@ -6,7 +6,7 @@ describe('validation/user-form.schema', () => {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane@doe.com',
-      roleIndex: 0,
+      role: 'Admin',
     });
     expect(result.success).toBe(true);
   });
@@ -16,7 +16,7 @@ describe('validation/user-form.schema', () => {
       firstName: '',
       lastName: '123',
       email: 'bad-email',
-      roleIndex: 0,
+      role: '',
     });
     expect(result.success).toBe(false);
   });

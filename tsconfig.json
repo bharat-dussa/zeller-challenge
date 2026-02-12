@@ -4,6 +4,6 @@
     "types": ["jest"],
   },
   "moduleResolution": "nodenext",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "jest.setup.js"],
   "exclude": ["**/node_modules", "**/Pods"]
 }

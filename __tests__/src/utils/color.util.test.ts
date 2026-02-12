@@ -1,4 +1,4 @@
-import { colors } from '../../../src/utils/color.util';
+import { colors } from '../../../src/shared/utils/color.util';
 
 describe('utils/color.util', () => {
   test('exports expected color keys', () => {

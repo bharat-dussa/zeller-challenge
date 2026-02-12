@@ -1,4 +1,4 @@
-import { graphqlClient } from '../../../../src/services/api/graphqlClient';
+import { graphqlClient } from '../../../../src/shared/services/api/graphqlClient';
 import { GraphQLClient } from 'graphql-request';
 
 jest.mock('graphql-request', () => ({

@@ -1,86 +1,60 @@
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import { TabBar } from '../../../src/components/tab-bar.component';
-
-jest.mock('../../../src/components/icons/search.icon', () => (props: any) => null);
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import { TabBar } from '../../../src/shared/components/tab-bar.component';
 
 describe('components/TabBar', () => {
-  test('throws when animatedIndex missing', () => {
+  test('throws when animatedIndex is missing', () => {
     expect(() => {
-      ReactTestRenderer.act(() => {
-        ReactTestRenderer.create(
-          <TabBar
-            // @ts-expect-error
-            animatedIndex={null}
-            tabs={['All']}
-            onPress={jest.fn()}
-          />,
-        );
-      });
+      render(
+        <TabBar
+          // @ts-expect-error
+          animatedIndex={null}
+          tabs={['All']}
+          onPress={jest.fn()}
+        />,
+      );
     }).toThrow('Index is required');
   });
 
-  test('renders tabs and handles press/onLayout', () => {
+  test('renders tabs and handles tab press/onLayout', () => {
     const animatedIndex = { value: 0 } as any;
     const onPress = jest.fn();
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(
-        <TabBar animatedIndex={animatedIndex} tabs={['All', 'Admin']} onPress={onPress} />,
-      );
-    });
+    render(<TabBar animatedIndex={animatedIndex} tabs={['All', 'Admin']} onPress={onPress} />);
 
-    const touchables = renderer!.root.findAllByType('TouchableOpacity');
-    const tabTouchables = touchables.filter(node => node.props.onLayout);
+    const firstTab = screen.getByTestId('tab-item-0');
+    const secondTab = screen.getByTestId('tab-item-1');
 
-    ReactTestRenderer.act(() => {
-      tabTouchables[0].props.onLayout({ nativeEvent: { layout: { width: 100 } } });
-      tabTouchables[1].props.onLayout({ nativeEvent: { layout: { width: 100 } } });
-    });
-
-    ReactTestRenderer.act(() => {
-      tabTouchables[1].props.onPress();
-    });
+    fireEvent(firstTab, 'layout', { nativeEvent: { layout: { width: 100 } } });
+    fireEvent(secondTab, 'layout', { nativeEvent: { layout: { width: 100 } } });
+    fireEvent.press(secondTab);
 
     expect(animatedIndex.value).toBe(1);
-    expect(onPress).toHaveBeenCalled();
+    expect(onPress).toHaveBeenCalledWith(1);
   });
 
-  test('toggles search and calls onSearch', () => {
+  test('toggles search, clears query, and forwards input changes', () => {
     const animatedIndex = { value: 0 } as any;
     const onSearch = jest.fn();
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(
-        <TabBar
-          animatedIndex={animatedIndex}
-          tabs={['All']}
-          onPress={jest.fn()}
-          search
-          searchQuery=""
-          onSearch={onSearch}
-        />,
-      );
-    });
+    render(
+      <TabBar
+        animatedIndex={animatedIndex}
+        tabs={['All']}
+        onPress={jest.fn()}
+        search
+        searchQuery=""
+        onSearch={onSearch}
+      />,
+    );
 
-    const touchables = renderer!.root.findAllByType('TouchableOpacity');
-    const searchToggle = touchables[touchables.length - 1];
-
-    ReactTestRenderer.act(() => {
-      searchToggle.props.onPress();
-    });
-
+    fireEvent.press(screen.getByTestId('tab-bar-search-toggle'));
     expect(onSearch).toHaveBeenCalledWith('');
 
-    const input = renderer!.root.findByType('TextInput');
-    ReactTestRenderer.act(() => {
-      input.props.onChangeText('abc');
-    });
+    const input = screen.getByTestId('tab-bar-search-input');
+    fireEvent.changeText(input, 'abc');
     expect(onSearch).toHaveBeenCalledWith('abc');
 
-    const cancelText = renderer!.root.findAllByType('Text').find(n => n.props.children === 'Cancel');
-    expect(cancelText).toBeTruthy();
+    expect(screen.getByTestId('tab-bar-search-cancel')).toBeTruthy();
   });
 });

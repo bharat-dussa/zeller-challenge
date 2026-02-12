@@ -1,78 +1,72 @@
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import { UserList } from '../../../src/components/user-list.component';
-import { ROUTES } from '../../../src/utils/route';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import { UserList } from '../../../src/features/users/components/user-list.component';
+import { ROUTES } from '../../../src/shared/utils/route';
 
 const mockNavigate = jest.fn();
 const mockOnRefresh = jest.fn();
 
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ navigate: mockNavigate }),
+let mockUsers: any[] = [];
+let mockLoading = false;
+let mockRefreshing = false;
+
+jest.mock('../../../src/shared/hooks/use-app-navigation.hook', () => ({
+  useAppNavigation: () => ({ navigate: mockNavigate }),
 }));
 
-jest.mock('../../../src/hooks/use-users.hook', () => ({
-  useUsers: () => ({ onRefresh: mockOnRefresh, refreshing: false }),
+jest.mock('../../../src/features/users/hooks/use-users.hook', () => ({
+  useUsers: () => ({
+    onRefresh: mockOnRefresh,
+    refreshing: mockRefreshing,
+    users: mockUsers,
+    loading: mockLoading,
+  }),
 }));
 
 describe('components/UserList', () => {
   beforeEach(() => {
+    mockUsers = [];
+    mockLoading = false;
+    mockRefreshing = false;
     mockNavigate.mockClear();
     mockOnRefresh.mockClear();
   });
 
-  test('renders section list and triggers navigation', () => {
-    const data = [
-      { id: '1', _id: '1', name: 'Alice', role: 'Admin', email: 'a@a.com', letter: 'A' },
-      { id: '2', _id: '2', name: 'Bob', role: 'Manager', email: 'b@b.com', letter: 'B' },
+  test('shows loader while loading', () => {
+    mockLoading = true;
+
+    render(<UserList role={'All' as any} />);
+
+    expect(screen.getByTestId('loader-container')).toBeTruthy();
+  });
+
+  test('renders sections and triggers navigation on item press', () => {
+    mockUsers = [
+      { id: '1', _id: '1', name: 'Alice', role: 'Admin', email: 'a@a.com' },
+      { id: '2', _id: '2', name: 'Bob', role: 'Manager', email: 'b@b.com' },
     ];
 
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<UserList data={data as any} />);
-    });
+    render(<UserList role={'All' as any} />);
 
-    const sectionList = renderer!.root.findByType('SectionList');
-    expect(sectionList.props.refreshControl.props.refreshing).toBe(false);
+    expect(screen.getByTestId('user-list-section-A')).toBeTruthy();
+    expect(screen.getByTestId('user-list-section-B')).toBeTruthy();
 
-    let headerTree: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      headerTree = ReactTestRenderer.create(
-        sectionList.props.renderSectionHeader({ section: { title: 'A' } }),
-      );
-    });
-    expect(headerTree!.root.findByType('Text').props.children).toBe('A');
+    expect(screen.getByTestId('user-list-item-role-1').props.children).toBe('Admin');
+    expect(screen.queryByTestId('user-list-item-role-2')).toBeNull();
 
-    let adminTree: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      adminTree = ReactTestRenderer.create(
-        sectionList.props.renderItem({
-          item: { id: '1', name: 'Alice', role: 'Admin', email: 'a@a.com' },
-          index: 0,
-          section: { title: 'A', data: [] },
-        }),
-      );
-    });
+    fireEvent.press(screen.getByTestId('user-list-item-1'));
 
-    const adminRoleText = adminTree!.root.findAllByType('Text').map(n => n.props.children);
-    expect(adminRoleText).toContain('Admin');
-
-    const touchable = adminTree!.root.findByType('TouchableOpacity');
-    touchable.props.onPress();
     expect(mockNavigate).toHaveBeenCalledWith(ROUTES.addUserScreen, {
-      user: expect.objectContaining({ name: 'Alice' }),
+      user: expect.objectContaining({ id: '1', name: 'Alice' }),
     });
+  });
 
-    let managerTree: ReactTestRenderer.ReactTestRenderer;
-    ReactTestRenderer.act(() => {
-      managerTree = ReactTestRenderer.create(
-        sectionList.props.renderItem({
-          item: { id: '2', name: 'Bob', role: 'Manager', email: 'b@b.com' },
-          index: 1,
-          section: { title: 'B', data: [] },
-        }),
-      );
-    });
-    const managerRoleText = managerTree!.root.findAllByType('Text').map(n => n.props.children);
-    expect(managerRoleText).not.toContain('Manager');
+  test('renders empty state for no users', () => {
+    mockUsers = [];
+
+    render(<UserList role={'All' as any} />);
+
+    expect(screen.getByTestId('no-data-container')).toBeTruthy();
+    expect(screen.getByTestId('no-data-text').props.children).toBe('No Data');
   });
 });

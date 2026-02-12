@@ -1,4 +1,4 @@
-import { UserEntity } from '../../../../src/db/schemas/user.schemas';
+import { UserEntity } from '../../../../src/shared/db/schemas/user.schemas';
 
 describe('db/schemas/user.schemas', () => {
   test('defines schema', () => {

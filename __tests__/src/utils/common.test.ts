@@ -1,4 +1,4 @@
-import { buildSections, getRandomUuid, ROLES, TABS } from '../../../src/utils/common';
+import { buildSections, getRandomUuid, ROLES, TABS } from '../../../src/shared/utils/common';
 
 describe('utils/common', () => {
   test('exports roles and tabs', () => {

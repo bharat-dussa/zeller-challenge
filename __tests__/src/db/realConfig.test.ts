@@ -2,11 +2,11 @@ import {
   createEncryptedRealmConfig,
   REALM_PATH,
   SCHEMA_VERSION,
-} from '../../../src/db/realConfig';
-import { SCHEMA } from '../../../src/db/schemas';
-import { getOrCreateKey } from '../../../src/db/secureKey';
+} from '../../../src/shared/db/realConfig';
+import { SCHEMA } from '../../../src/shared/db/schemas';
+import { getOrCreateKey } from '../../../src/shared/db/secureKey';
 
-jest.mock('../../../src/db/secureKey', () => ({
+jest.mock('../../../src/shared/db/secureKey', () => ({
   getOrCreateKey: jest.fn(),
 }));
 

@@ -1,7 +1,7 @@
 import {
   LIST_ZELLER_CUSTOMERS,
   GET_ZELLER_CUSTOMER,
-} from '../../../../src/services/graphql/queries';
+} from '../../../../src/shared/services/graphql/queries';
 
 describe('services/graphql/queries', () => {
   test('contains list query', () => {
