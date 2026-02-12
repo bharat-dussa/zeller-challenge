@@ -13,7 +13,10 @@ React Native app with offline-first data flow. GraphQL is used only as a remote 
 
 <img width="280" height="600" alt="simulator_screenshot_EB158F18-E77D-483B-A97F-254F48B90217" src="https://github.com/user-attachments/assets/b2dc055d-019e-4e26-a5f7-32990670248a" />
 <img  width="280" height="600" alt="simulator_screenshot_1A77475C-F021-4CAE-BC17-89F6D248B6DA" src="https://github.com/user-attachments/assets/5faed8e1-08bb-4815-a906-e3277f3c8174" />
-<img  width="280" height="600" alt="simulator_screenshot_02119C41-4B3A-4471-A94D-A6C659F6D3E6" src="https://github.com/user-attachments/assets/1aca1a3f-dd0f-4cdc-8810-3a3e376a7924" />
+
+<img width="280" height="600" alt="simulator_screenshot_1C26A4A6-0535-41E7-811C-7AF58089D9C4" src="https://github.com/user-attachments/assets/ca43e661-591f-4399-9769-6ccef22e48e9" />
+
+
 <img width="280" height="600" alt="simulator_screenshot_7D518008-9243-4DD3-AB07-45D7B9D8070F" src="https://github.com/user-attachments/assets/d8aba064-914d-47c3-a313-7528a3085dc2" />
 <img width="280" height="600" alt="simulator_screenshot_17644C5F-7C55-42BB-9E19-DDAC88DC1199" src="https://github.com/user-attachments/assets/fd4236dc-bfb0-454c-a618-924ccc056069" />
 <img width="280" height="600" alt="simulator_screenshot_A3295AAA-2EF3-468C-BEED-00AA6D8F90A5" src="https://github.com/user-attachments/assets/4f895817-0ed7-4658-b5be-30434bdc4eac" />
