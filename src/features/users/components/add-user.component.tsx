@@ -62,12 +62,14 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
 
   const onClose = () => {
     if (isEditMode && !isValid) {
+      setIsDeleteClicked(false);
       setIsShowBottomsheet(true);
     } else {
       onCloseBottomSheet();
       navigation.goBack();
     }
   };
+  
   const onPressRole = (idx: number) => {
     setValue('role', ROLES[idx], { shouldValidate: true });
     setIndex(idx);
@@ -79,7 +81,8 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
     if (!_user) return;
 
     await service.deleteUser(_user.id);
-    onClose();
+    onCloseBottomSheet();
+    navigation.goBack();
   };
 
   const onDelete = () => {
@@ -217,34 +220,33 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
         <AppBottomSheet
           visible={isShowBottomsheet}
           onClose={onCloseBottomSheet}
-          children={
-            <BottomSheetContent
-              title={
-                isValid && isDeleteClicked
-                  ? t.messages['delete-user-prompt']
-                  : t.messages['please-clear-form-errors']
-              }
-              secondaryButtonProps={
-                !isValid && !isDeleteClicked
-                  ? undefined
-                  : {
-                      title: t.labels.delete,
-                      variant: 'label',
-                      textStyle: { color: colors.error },
-                      onPress: () => handleDeleteUser(user),
-                    }
-              }
-              primaryButtonProps={
-                !isValid && !isDeleteClicked
-                  ? undefined
-                  : {
-                      title: t.labels.cancel,
-                      onPress: onCloseBottomSheet,
-                    }
-              }
-            />
-          }
-        />
+        >
+          <BottomSheetContent
+            title={
+              isValid && isDeleteClicked
+                ? t.messages['delete-user-prompt']
+                : t.messages['please-clear-form-errors']
+            }
+            secondaryButtonProps={
+              !isValid && !isDeleteClicked
+                ? undefined
+                : {
+                    title: t.labels.delete,
+                    variant: 'label',
+                    textStyle: { color: colors.error },
+                    onPress: () => handleDeleteUser(user),
+                  }
+            }
+            primaryButtonProps={
+              !isValid && !isDeleteClicked
+                ? undefined
+                : {
+                    title: t.labels.cancel,
+                    onPress: onCloseBottomSheet,
+                  }
+            }
+          />
+        </AppBottomSheet>
       </View>
     </SafeAreaView>
   );
@@ -256,19 +258,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 14,
   },
-  contentContainer: {
-    gap: 40,
-    justifyContent: 'center',
-  },
   closeIcon: { marginLeft: 6, marginBottom: 30 },
   newUser: { fontWeight: '600', fontSize: 16 },
-  modalText: { fontWeight: '600' },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '600',
-  },
 
   content: {
     flex: 1,
@@ -288,45 +279,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     fontSize: 15,
-  },
-
-  roleRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-
-  rolePill: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.tabBackground,
-  },
-
-  roleText: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-
-  footer: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.inputBorder,
-  },
-
-  saveButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 40,
-    alignItems: 'center',
-  },
-
-  saveText: {
-    color: colors.cardBackground,
-    fontSize: 16,
-    fontWeight: '600',
   },
 
   error: {
@@ -349,14 +301,6 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 16,
     fontWeight: '600',
-  },
-
-  saveButtonDisabled: {
-    opacity: 0.5,
-  },
-
-  buttonContainer: {
-    paddingHorizontal: 10,
   },
 });
 

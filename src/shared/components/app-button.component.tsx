@@ -43,18 +43,30 @@ export const AppButton = ({
   textStyle,
 }: AppButtonProps) => {
   const isDisabled = disabled || loading;
+  const containerVariantStyleMap = {
+    primary: styles.primary,
+    secondary: styles.secondary,
+    outline: styles.outline,
+    label: styles.label,
+  };
+  const textVariantStyleMap = {
+    primary: styles.primaryText,
+    secondary: styles.secondaryText,
+    outline: styles.outlineText,
+    label: styles.labelText,
+  };
 
   const containerStyles = [
     styles.base,
     fullWidth && styles.fullWidth,
-    styles[variant],
+    containerVariantStyleMap[variant],
     isDisabled && styles.disabled,
     style,
   ];
 
   const textStyles = [
     styles.textBase,
-    styles[`${variant}Text` as keyof typeof styles],
+    textVariantStyleMap[variant],
     isDisabled && styles.disabledText,
     textStyle,
   ];

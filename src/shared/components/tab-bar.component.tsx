@@ -194,11 +194,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderRadius: 50,
   },
-  activeTab: {
-    backgroundColor: colors.tabBackground,
-    borderColor: colors.primary,
-    borderWidth: 1,
-  },
   tab: {
     flex: 1,
     alignItems: 'center',

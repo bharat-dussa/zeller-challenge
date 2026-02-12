@@ -107,7 +107,6 @@ export const UserList: FC<UserListProps> = ({
 
 const styles = StyleSheet.create({
   container: { padding: 16, height: '100%' },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
   letter: { fontSize: 16, marginVertical: 12 },
   card: {
     padding: 16,
