@@ -16,7 +16,8 @@ export const t = {
     'delete-user': 'Delete user',
     'delete': 'Delete',
     'user-lower': 'user',
-    'cancel': 'Cancel'
+    'cancel': 'Cancel',
+    'user': 'User'
   },
   messages: {
     "delete-user-prompt": "Are you sure want to delete user ?",

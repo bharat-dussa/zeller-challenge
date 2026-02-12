@@ -130,8 +130,8 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
         </TouchableOpacity>
 
         <View>
-          <Text testID="add-user-title" style={styles.newUser}>
-            {t.labels['new-user-cap']}
+          <Text testID={isEditMode ? "update-user-title" : "add-user-title"} style={styles.newUser}>
+            {isEditMode ? t.labels.user : t.labels['new-user-cap']}
           </Text>
         </View>
         <View testID="add-user-content" style={styles.content}>

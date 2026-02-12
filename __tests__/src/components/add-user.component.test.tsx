@@ -107,6 +107,8 @@ describe('components/AddUser', () => {
     fireEvent.press(screen.getByTestId('add-user-save-button'));
 
     await waitFor(() => {
+      expect(screen.getByTestId('add-user-title')).toBeOnTheScreen();
+      expect(screen.queryByTestId('update-user-title')).toBeNull();
       expect(mockSetValue).toHaveBeenCalledWith('role', 'Manager', {
         shouldValidate: true,
       });
@@ -139,6 +141,9 @@ describe('components/AddUser', () => {
     fireEvent.press(screen.getByTestId('add-user-save-button'));
 
     await waitFor(() => {
+      expect(screen.queryByTestId('add-user-title')).toBeNull();
+      expect(screen.getByTestId('update-user-title')).toBeOnTheScreen();
+
       expect(mockUpdateUser).toHaveBeenCalledWith(
         expect.objectContaining({
           id: '1',
