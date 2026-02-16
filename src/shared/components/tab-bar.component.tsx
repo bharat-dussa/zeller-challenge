@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,12 +12,14 @@ import Animated, {
   interpolateColor,
   SharedValue,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import { colors } from '../utils/color.util';
 import { t } from '../utils/t';
 import SearchIcon from './icons/search.icon';
+import { useTabIndex } from '../hooks/use-tab-index.hook';
 
 type TabItemProps = {
   label: string;
@@ -29,7 +31,6 @@ type TabItemProps = {
 };
 
 type TabBarProps = {
-  animatedIndex: SharedValue<number>;
   tabs: readonly string[];
   onPress: (idx: number) => void;
   search?: boolean;
@@ -72,114 +73,134 @@ const TabItem = ({
   );
 };
 
-export const TabBar = ({
-  animatedIndex,
-  tabs = [],
-  onPress,
-  search,
-  searchQuery,
-  onSearch,
-}: TabBarProps) => {
-  const [tabWidth, setTabWidth] = useState(0);
-  const [isSearching, setIsSearching] = useState(false);
-  const searchProgress = useSharedValue(0); // 0 - tabs, 1 -search
-
-  if (!animatedIndex) {
-    throw new Error(t.error['index-required']);
-  }
-
-  const toggleSearch = () => {
-    const value = searchProgress.value === 0 ? 1 : 0;
-    setIsSearching(is => !is);
-    searchProgress.value = withTiming(value, {
-      duration: 350,
-      easing: Easing.out(Easing.cubic),
-    });
-    onSearch?.('');
-  };
-  const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: withTiming(animatedIndex.value * tabWidth, {
-          duration: 500,
-          easing: Easing.bezier(0.25, 0.1, 0.25, 1.0),
-        }),
-      },
-    ],
-  }));
-
-  const handlePress = (tabIndex: number) => {
-    animatedIndex.value = tabIndex;
-    onPress?.(tabIndex);
-  };
-
-  const tabsStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(searchProgress.value, [0, 1], [1, 0]),
-    transform: [
-      {
-        translateX: interpolate(searchProgress.value, [0, 1], [0, -30]),
-      },
-    ],
-  }));
-
-  const searchStyle = useAnimatedStyle(() => ({
-    opacity: searchProgress.value,
-    transform: [
-      {
-        translateX: interpolate(searchProgress.value, [0, 1], [30, 0]),
-      },
-    ],
-    position: 'absolute',
-    width: '100%',
-  }));
-
-  return (
-    <View testID="tab-bar-container" style={styles.container}>
-      <Animated.View testID="tab-bar-tabs" style={[styles.tabsContainer, tabsStyle]}>
-        <Animated.View
-          testID="tab-bar-indicator"
-          style={[styles.indicator, { width: tabWidth }, indicatorStyle]}
-        />
-        {tabs.map((tab, index) => (
-          <TabItem
-            key={`${tab}-${index}`}
-            label={tab}
-            index={index}
-            tabWidth={tabWidth}
-            animatedIndex={animatedIndex}
-            onPress={handlePress}
-            setTabWidth={setTabWidth}
-          />
-        ))}
-      </Animated.View>
-
-      {search && isSearching ? (
-        <Animated.View testID="tab-bar-search-wrapper" style={searchStyle}>
-          <TextInput
-            testID="tab-bar-search-input"
-            placeholder="Search…"
-            value={searchQuery}
-            onChangeText={onSearch}
-            placeholderTextColor={colors.gray}
-            style={styles.searchInput}
-            autoFocus
-          />
-        </Animated.View>
-      ) : null}
-      {search ? (
-        <TouchableOpacity testID="tab-bar-search-toggle" onPress={toggleSearch}>
-          {isSearching ? (
-            <Text testID="tab-bar-search-cancel" style={styles.cancelText}>
-              Cancel
-            </Text>
-          ) : (
-            <SearchIcon testID="tab-bar-search-icon" width={18} height={18} />
-          )}
-        </TouchableOpacity>
-      ) : null}
-    </View>
-  );
+export type TabBarRef = {
+  setIndex: (index: number) => void;
 };
+
+export const TabBar = forwardRef<TabBarRef, TabBarProps>(
+  ({ tabs = [], onPress, search, searchQuery, onSearch }: TabBarProps, ref) => {
+    const { index: animatedIndex, setIndex } = useTabIndex(0);
+
+    const [tabWidth, setTabWidth] = useState(0);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchProgress = useSharedValue(0); // 0 - tabs, 1 -search
+
+    if (!animatedIndex) {
+      throw new Error(t.error['index-required']);
+    }
+
+    useImperativeHandle(ref, () => ({
+      setIndex,
+    }));
+
+    const toggleSearch = () => {
+      const value = searchProgress.value === 0 ? 1 : 0;
+      setIsSearching(is => !is);
+      searchProgress.value = withTiming(value, {
+        duration: 350,
+        easing: Easing.out(Easing.cubic),
+      });
+      onSearch?.('');
+    };
+
+    const translateX = useDerivedValue(() =>
+      withTiming(animatedIndex.value * tabWidth, {
+        duration: 500,
+      }),
+    );
+
+    const tabStyleX = useDerivedValue(() =>
+      interpolate(searchProgress.value, [0, 1], [0, -30]),
+    );
+
+    const indicatorStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          translateX: translateX.value,
+        },
+      ],
+    }));
+
+    const handlePress = (tabIndex: number) => {
+      animatedIndex.value = tabIndex;
+      setIndex(tabIndex);
+      onPress?.(tabIndex);
+    };
+
+    const tabsStyle = useAnimatedStyle(() => ({
+      opacity: interpolate(searchProgress.value, [0, 1], [1, 0]),
+      transform: [
+        {
+          translateX: tabStyleX.value,
+        },
+      ],
+    }));
+
+    const searchStyle = useAnimatedStyle(() => ({
+      opacity: searchProgress.value,
+      transform: [
+        {
+          translateX: interpolate(searchProgress.value, [0, 1], [30, 0]),
+        },
+      ],
+      position: 'absolute',
+      inset: 0,
+    }));
+
+    return (
+      <View testID="tab-bar-container" style={styles.container}>
+        <Animated.View
+          testID="tab-bar-tabs"
+          style={[styles.tabsContainer, tabsStyle]}
+        >
+          <Animated.View
+            testID="tab-bar-indicator"
+            style={[styles.indicator, { width: tabWidth }, indicatorStyle]}
+          />
+          {tabs.map((tab, index) => (
+            <TabItem
+              key={`${tab}-${index}`}
+              label={tab}
+              index={index}
+              tabWidth={tabWidth}
+              animatedIndex={animatedIndex}
+              onPress={handlePress}
+              setTabWidth={setTabWidth}
+            />
+          ))}
+        </Animated.View>
+
+        {search && isSearching ? (
+          <Animated.View testID="tab-bar-search-wrapper" style={searchStyle}>
+            <TextInput
+              testID="tab-bar-search-input"
+              placeholder="Search…"
+              value={searchQuery}
+              onChangeText={onSearch}
+              placeholderTextColor={colors.gray}
+              style={styles.searchInput}
+              autoFocus
+            />
+          </Animated.View>
+        ) : null}
+        {search ? (
+          <TouchableOpacity
+            testID="tab-bar-search-toggle"
+            onPress={toggleSearch}
+          >
+            {isSearching ? (
+              <Text testID="tab-bar-search-cancel" style={styles.cancelText}>
+                Cancel
+              </Text>
+            ) : (
+              <SearchIcon testID="tab-bar-search-icon" width={18} height={18} />
+            )}
+          </TouchableOpacity>
+        ) : null}
+      </View>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   container: {

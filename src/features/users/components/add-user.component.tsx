@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   StyleSheet,
@@ -30,8 +30,11 @@ interface AddUserProps {
 
 export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
   // This is required since we are using shared value in useTabIndex.
-  const initialIndex =
-    user?.role && ROLES.includes(user.role) ? ROLES.indexOf(user.role) : 0;
+  const initialIndex = useMemo(
+    () =>
+      user?.role && ROLES.includes(user.role) ? ROLES.indexOf(user.role) : 0,
+    [],
+  );
 
   const { index, setIndex } = useTabIndex(initialIndex);
   const [isShowBottomsheet, setIsShowBottomsheet] = useState(false);
@@ -69,7 +72,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
       navigation.goBack();
     }
   };
-  
+
   const onPressRole = (idx: number) => {
     setValue('role', ROLES[idx], { shouldValidate: true });
     setIndex(idx);
@@ -130,7 +133,10 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
         </TouchableOpacity>
 
         <View>
-          <Text testID={isEditMode ? "update-user-title" : "add-user-title"} style={styles.newUser}>
+          <Text
+            testID={isEditMode ? 'update-user-title' : 'add-user-title'}
+            style={styles.newUser}
+          >
             {isEditMode ? t.labels.user : t.labels['new-user-cap']}
           </Text>
         </View>
