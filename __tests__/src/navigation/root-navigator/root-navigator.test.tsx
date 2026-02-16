@@ -17,5 +17,8 @@ describe('navigation/RootNavigator', () => {
     expect(screens[1].props.name).toBe(ROUTES.addUserScreen);
     expect(screens[1].props.component).toBeUndefined();
     expect(typeof screens[1].props.getComponent).toBe('function');
+
+    const lazyAddUserScreen = screens[1].props.getComponent();
+    expect(typeof lazyAddUserScreen).toBe('function');
   });
 });
