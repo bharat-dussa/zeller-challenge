@@ -19,4 +19,10 @@ describe('hooks/use-tab-index', () => {
 
     expect(result.current.index.value).toBe(2);
   });
+
+  test('respects a default initial value', () => {
+    const { result } = renderHook(() => useTabIndex());
+
+    expect(result.current.index.value).toBe(0);
+  });
 });

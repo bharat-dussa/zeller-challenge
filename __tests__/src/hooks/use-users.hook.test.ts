@@ -90,4 +90,23 @@ describe('hooks/use-users', () => {
     expect(result.current.error).toBe('network down');
     expect(result.current.refreshing).toBe(false);
   });
+
+  test('sets refresh error default message when refresh fails', async () => {
+    (fetchUsers as jest.Mock)
+      .mockResolvedValueOnce([{ id: '3', name: 'Cara', role: 'Admin', email: 'c@a.com' }])
+      .mockRejectedValueOnce(undefined);
+
+    const { result } = renderHook(() => useUsers());
+
+    await waitFor(() => {
+      expect(fetchUsers).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      await result.current.onRefresh();
+    });
+
+    expect(result.current.error).toBe(t.error['something-went-wrong']);
+    expect(result.current.refreshing).toBe(false);
+  });
 });
