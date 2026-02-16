@@ -85,10 +85,6 @@ export const TabBar = forwardRef<TabBarRef, TabBarProps>(
     const [isSearching, setIsSearching] = useState(false);
     const searchProgress = useSharedValue(0); // 0 - tabs, 1 -search
 
-    if (!animatedIndex) {
-      throw new Error(t.error['index-required']);
-    }
-
     useImperativeHandle(ref, () => ({
       setIndex,
     }));

@@ -4,20 +4,15 @@ import UserListScreen from '../../../../src/features/users/screens/user-list.scr
 import { ROUTES } from '../../../../src/shared/utils/route';
 import { TABS } from '../../../../src/shared/utils/common';
 
-const mockSetIndex = jest.fn();
 const mockSetPage = jest.fn();
 const mockNavigate = jest.fn();
 
-const mockIndex = { value: 0 };
 
 let mockTabBarProps: any = null;
 let mockFloatingButtonProps: any = null;
 let mockPagerProps: any = null;
 const mockUserListProps: any[] = [];
 
-jest.mock('../../../../src/shared/hooks/use-tab-index.hook', () => ({
-  useTabIndex: () => ({ index: mockIndex, setIndex: mockSetIndex }),
-}));
 
 jest.mock('../../../../src/shared/hooks/use-app-navigation.hook', () => ({
   useAppNavigation: () => ({ navigate: mockNavigate }),
@@ -71,8 +66,6 @@ jest.mock('react-native-pager-view', () => {
 
 describe('screens/UserListScreen', () => {
   beforeEach(() => {
-    mockIndex.value = 0;
-    mockSetIndex.mockClear();
     mockSetPage.mockClear();
     mockNavigate.mockClear();
     mockTabBarProps = null;
@@ -98,13 +91,11 @@ describe('screens/UserListScreen', () => {
     act(() => {
       mockTabBarProps.onPress(2);
     });
-    expect(mockSetIndex).toHaveBeenCalledWith(2);
     expect(mockSetPage).toHaveBeenCalledWith(2);
 
     act(() => {
       mockPagerProps.onPageSelected({ nativeEvent: { position: 1 } });
     });
-    expect(mockSetIndex).toHaveBeenCalledWith(1);
     expect(mockSetPage).toHaveBeenCalledWith(1);
   });
 

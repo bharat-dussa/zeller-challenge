@@ -31,7 +31,11 @@ jest.mock('react-native-reanimated', () => {
       cubic: value => value,
       bezier: () => value => value,
     },
-    useSharedValue: initial => ({ value: initial }),
+    useSharedValue: initial => {
+      const ref = mockReact.useRef({ value: initial });
+      return ref.current;
+    },
+    useDerivedValue: updater => ({ value: updater() }),
     useAnimatedStyle: updater => updater(),
     withTiming: value => value,
     interpolate,
@@ -58,7 +62,11 @@ jest.mock('uuid', () => ({ v4: () => 'uuid' }));
 jest.mock('@react-navigation/native', () => ({
   NavigationContainer: ({ children, ...props }) =>
     mockReact.createElement('NavigationContainer', props, children),
-  useNavigation: () => ({ navigate: jest.fn(), pop: jest.fn(), goBack: jest.fn() }),
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    pop: jest.fn(),
+    goBack: jest.fn(),
+  }),
   useRoute: () => ({ params: {} }),
 }));
 
