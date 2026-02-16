@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,21 +14,27 @@ import { UserList } from '../components/user-list.component';
 
 const UserListScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const pagerRef = useRef<PagerView>(null);
   const tabSwipeRef = useRef<TabBarRef>(null);
 
   const navigation = useAppNavigation();
 
-  const onPress = (idx: number) => {
+  const onTabPress = useCallback((idx: number) => {
+    setActiveTabIndex(prev => (prev === idx ? prev : idx));
     tabSwipeRef.current?.setIndex(idx);
-    pagerRef.current?.setPage(Number(idx));
-  };
+    pagerRef.current?.setPage(idx);
+  }, []);
 
-  const onPressUserAdd = () => {
-    onPress(0); // to reset tab navigation 
+  const onPageSelected = useCallback((idx: number) => {
+    setActiveTabIndex(prev => (prev === idx ? prev : idx));
+    tabSwipeRef.current?.setIndex(idx);
+  }, []);
+
+  const onPressUserAdd = useCallback(() => {
+    onTabPress(0); // reset list tab
     navigation.navigate(ROUTES.addUserScreen);
-  };
-
+  }, [navigation, onTabPress]);
 
   return (
     <SafeAreaView testID="user-list-screen" style={styles.flex}>
@@ -36,7 +42,7 @@ const UserListScreen = () => {
         <TabBar
           ref={tabSwipeRef}
           tabs={TABS}
-          onPress={onPress}
+          onPress={onTabPress}
           onSearch={setSearchQuery}
           search
           searchQuery={searchQuery}
@@ -48,8 +54,9 @@ const UserListScreen = () => {
         ref={pagerRef}
         style={styles.flex}
         initialPage={0}
+        offscreenPageLimit={1}
         onPageSelected={e => {
-          onPress(e.nativeEvent.position);
+          onPageSelected(e.nativeEvent.position);
         }}
       >
         {TABS.map((role, idx) => (
@@ -57,7 +64,7 @@ const UserListScreen = () => {
             key={`${role}-${idx}`}
             testID={`user-list-page-${idx}`}
             role={role}
-            searchQuery={searchQuery}
+            searchQuery={idx === activeTabIndex ? searchQuery : ''}
           />
         ))}
       </PagerView>

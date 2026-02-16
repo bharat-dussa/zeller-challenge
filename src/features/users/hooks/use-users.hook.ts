@@ -14,6 +14,8 @@ import {
   searchUsersByName,
 } from '../services/api/users/user.logic';
 
+let initialUsersSyncInFlight: Promise<void> | null = null;
+
 export const useUsers = (role?: UserRoleWithAll, searchQuery: string = '') => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -22,18 +24,31 @@ export const useUsers = (role?: UserRoleWithAll, searchQuery: string = '') => {
   const dbUsers = useQuery(UserEntity);
   const service = useRealmService();
 
+  const syncUsers = useCallback(async () => {
+    const remoteUsers = await fetchUsers();
+    await service.createMutliUsers(remoteUsers);
+  }, [service]);
+
+  const syncUsersForInitialLoad = useCallback(async () => {
+    if (!initialUsersSyncInFlight) {
+      initialUsersSyncInFlight = syncUsers().finally(() => {
+        initialUsersSyncInFlight = null;
+      });
+    }
+    return initialUsersSyncInFlight;
+  }, [syncUsers]);
+
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const remoteUsers = await fetchUsers();
-      service.createMutliUsers(remoteUsers);
+      await syncUsersForInitialLoad();
     } catch {
       setError(t.error['load-users']);
     } finally {
       setLoading(false);
     }
-  }, [service]);
+  }, [syncUsersForInitialLoad]);
 
   useEffect(() => {
     loadUsers();
@@ -48,17 +63,16 @@ export const useUsers = (role?: UserRoleWithAll, searchQuery: string = '') => {
     return mapUsersToListItems(filtered);
   }, [dbUsers, role, searchQuery]);
 
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      const remoteUsers = await fetchUsers();
-      service.createMutliUsers(remoteUsers);
+      await syncUsers();
     } catch (err) {
       setError(err instanceof Error ? err.message : t.error['something-went-wrong']);
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [syncUsers]);
 
   return {
     users: listItems,

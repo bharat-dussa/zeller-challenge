@@ -80,6 +80,7 @@ describe('screens/UserListScreen', () => {
     expect(mockTabBarProps.tabs).toEqual(TABS);
     expect(mockTabBarProps.search).toBe(true);
     expect(mockTabBarProps.searchQuery).toBe('');
+    expect(mockPagerProps.offscreenPageLimit).toBe(1);
 
     expect(mockUserListProps).toHaveLength(TABS.length);
     expect(mockUserListProps.map(p => p.role)).toEqual(TABS);
@@ -96,10 +97,10 @@ describe('screens/UserListScreen', () => {
     act(() => {
       mockPagerProps.onPageSelected({ nativeEvent: { position: 1 } });
     });
-    expect(mockSetPage).toHaveBeenCalledWith(1);
+    expect(mockSetPage).toHaveBeenCalledTimes(1);
   });
 
-  test('updates search query for all pager pages', () => {
+  test('applies search query only to active pager page', () => {
     render(<UserListScreen />);
 
     act(() => {
@@ -107,9 +108,18 @@ describe('screens/UserListScreen', () => {
     });
 
     const latestProps = mockUserListProps.slice(-TABS.length);
-    latestProps.forEach((props: any) => {
-      expect(props.searchQuery).toBe('ali');
+    expect(latestProps[0].searchQuery).toBe('ali');
+    expect(latestProps[1].searchQuery).toBe('');
+    expect(latestProps[2].searchQuery).toBe('');
+
+    act(() => {
+      mockPagerProps.onPageSelected({ nativeEvent: { position: 1 } });
     });
+
+    const afterPageChange = mockUserListProps.slice(-TABS.length);
+    expect(afterPageChange[0].searchQuery).toBe('');
+    expect(afterPageChange[1].searchQuery).toBe('ali');
+    expect(afterPageChange[2].searchQuery).toBe('');
   });
 
   test('navigates to add user on floating button press', () => {

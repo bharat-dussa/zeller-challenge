@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { createRealmContext } from '@realm/react';
 import { SCHEMA } from '../../shared/db/schemas';
 import { RealmService } from '../../shared/services/realm/realm-service';
@@ -20,12 +20,10 @@ export const RealmServiceProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const realm = useRealm();
-  const [service, setService] = useState<RealmService | null>(null);
-
-  useEffect(() => {
-    if (!realm) return;
-    setService(RealmService.fromRealm(realm));
-  }, [realm]);
+  const service = useMemo(
+    () => (realm ? RealmService.fromRealm(realm) : null),
+    [realm],
+  );
 
   if (!service) return null;
 

@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "test:perf": "jest __tests__/src/hooks/use-users.hook.test.ts __tests__/src/screens/user-list/user-list.screen.test.tsx __tests__/src/navigation/root-navigator/root-navigator.test.tsx --runInBand --watchman=false"
   },
   "dependencies": {
     "@hookform/resolvers": "5.2.2",

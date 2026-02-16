@@ -1,6 +1,5 @@
-import { FC, useMemo } from 'react';
+import { FC, memo, useCallback, useMemo } from 'react';
 import {
-  RefreshControl,
   SectionList,
   SectionListRenderItemInfo,
   StyleSheet,
@@ -40,11 +39,10 @@ interface UserListProps {
   testID?: string;
 }
 
-const renderItem = ({ item, index, navigation }: RenderItem) => (
+const renderUserItem = ({ item, index, navigation }: RenderItem) => (
   <TouchableOpacity
     testID={`user-list-item-${item.id || item._id || index}`}
     style={styles.card}
-    key={index}
     onPress={() =>
       navigation.navigate(ROUTES.addUserScreen, {
         user: item,
@@ -72,7 +70,7 @@ const renderItem = ({ item, index, navigation }: RenderItem) => (
   </TouchableOpacity>
 );
 
-export const UserList: FC<UserListProps> = ({
+const UserListComponent: FC<UserListProps> = ({
   role,
   searchQuery = '',
   testID = 'user-list-section-list',
@@ -80,6 +78,23 @@ export const UserList: FC<UserListProps> = ({
   const { onRefresh, refreshing, users, loading } = useUsers(role, searchQuery);
   const sections = useMemo(() => buildSections(users), [users]);
   const navigation = useAppNavigation();
+  const keyExtractor = useCallback(
+    (item: UserItem) => `${item.id || item._id || ''}-${item.name || ''}`,
+    [],
+  );
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: UserSection }) => (
+      <Text testID={`user-list-section-${section.title}`} style={styles.letter}>
+        {section.title}
+      </Text>
+    ),
+    [],
+  );
+  const renderItem = useCallback(
+    (props: SectionListRenderItemInfo<UserItem, UserSection>) =>
+      renderUserItem({ ...props, navigation }),
+    [navigation],
+  );
 
   if (loading) {
     return <Loader />;
@@ -89,21 +104,22 @@ export const UserList: FC<UserListProps> = ({
     <SectionList
       testID={testID}
       sections={sections}
-      keyExtractor={item => item.id + item.name}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      keyExtractor={keyExtractor}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
       contentContainerStyle={styles.container}
-      renderSectionHeader={({ section }) => (
-        <Text testID={`user-list-section-${section.title}`} style={styles.letter}>
-          {section.title}
-        </Text>
-      )}
-      renderItem={props => renderItem({ ...props, navigation })}
+      renderSectionHeader={renderSectionHeader}
+      renderItem={renderItem}
       ListEmptyComponent={NoData}
+      initialNumToRender={12}
+      maxToRenderPerBatch={10}
+      windowSize={7}
+      removeClippedSubviews
     />
   );
 };
+
+export const UserList = memo(UserListComponent);
 
 const styles = StyleSheet.create({
   container: { padding: 16, height: '100%' },

@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, {
+  forwardRef,
+  useDeferredValue,
+  useImperativeHandle,
+  useState,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -132,11 +137,16 @@ export const TabBar = forwardRef<TabBarRef, TabBarProps>(
       ],
     }));
 
+    const searchBarX = useDerivedValue(() =>
+      interpolate(searchProgress.value, [0, 1], [30, 0]),
+    );
+
+    const searchProgressValue = useDerivedValue(() => searchProgress.value);
     const searchStyle = useAnimatedStyle(() => ({
-      opacity: searchProgress.value,
+      opacity: searchProgressValue.value,
       transform: [
         {
-          translateX: interpolate(searchProgress.value, [0, 1], [30, 0]),
+          translateX: searchBarX.value,
         },
       ],
       position: 'absolute',
@@ -165,20 +175,17 @@ export const TabBar = forwardRef<TabBarRef, TabBarProps>(
             />
           ))}
         </Animated.View>
-
-        {search && isSearching ? (
-          <Animated.View testID="tab-bar-search-wrapper" style={searchStyle}>
-            <TextInput
-              testID="tab-bar-search-input"
-              placeholder="Search…"
-              value={searchQuery}
-              onChangeText={onSearch}
-              placeholderTextColor={colors.gray}
-              style={styles.searchInput}
-              autoFocus
-            />
-          </Animated.View>
-        ) : null}
+        <Animated.View testID="tab-bar-search-wrapper" style={searchStyle}>
+          <TextInput
+            testID="tab-bar-search-input"
+            placeholder="Search…"
+            value={searchQuery}
+            onChangeText={onSearch}
+            placeholderTextColor={colors.gray}
+            style={styles.searchInput}
+            autoFocus
+          />
+        </Animated.View>
         {search ? (
           <TouchableOpacity
             testID="tab-bar-search-toggle"
