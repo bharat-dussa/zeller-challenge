@@ -76,6 +76,6 @@ describe('components/TabBar', () => {
 
     fireEvent.press(screen.getByTestId('tab-bar-search-toggle'));
     expect(onSearch).toHaveBeenLastCalledWith('');
-    expect(screen.queryByTestId('tab-bar-search-input')).not.toBeOnTheScreen();
+    expect(screen.queryByTestId('tab-bar-search-cancel')).not.toBeOnTheScreen();
   });
 });

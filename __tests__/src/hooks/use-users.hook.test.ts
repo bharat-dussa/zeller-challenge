@@ -46,6 +46,20 @@ describe('hooks/use-users', () => {
     expect(result.current.users[0].name).toBe('Alice');
   });
 
+  test('deduplicates initial sync when multiple tab instances mount together', async () => {
+    (useQuery as jest.Mock).mockReturnValue([]);
+
+    renderHook(() => useUsers());
+    renderHook(() => useUsers('Admin'));
+    renderHook(() => useUsers('Manager'));
+
+    await waitFor(() => {
+      expect(fetchUsers).toHaveBeenCalledTimes(1);
+    });
+
+    expect(createMutliUsers).toHaveBeenCalledTimes(1);
+  });
+
   test('sets default error on initial load failure', async () => {
     (fetchUsers as jest.Mock).mockRejectedValueOnce(new Error('fail'));
 

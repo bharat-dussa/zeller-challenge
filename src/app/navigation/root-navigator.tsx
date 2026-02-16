@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import UserListScreen from '../../features/users/screens/user-list.screen';
-import AddUserScreen from '../../features/users/screens/add-user.screen';
 import { ROUTES } from '../../shared/utils/route';
+import UserListScreen from '../../features/users/screens/user-list.screen';
+import React from 'react';
 
 const Stack = createNativeStackNavigator();
 
@@ -12,11 +12,15 @@ export function RootNavigator() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name={ROUTES.userListScreen} component={UserListScreen} />
+      <Stack.Screen
+        name={ROUTES.userListScreen}
+        component={UserListScreen}
+      />
       <Stack.Screen
         name={ROUTES.addUserScreen}
-        component={AddUserScreen}
-        
+        getComponent={() =>
+          require('../../features/users/screens/add-user.screen').default
+        }
       />
     </Stack.Navigator>
   );

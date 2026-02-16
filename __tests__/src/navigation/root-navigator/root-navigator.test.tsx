@@ -13,6 +13,12 @@ describe('navigation/RootNavigator', () => {
     expect(navigator.props.screenOptions).toEqual({ headerShown: false });
     expect(screens).toHaveLength(2);
     expect(screens[0].props.name).toBe(ROUTES.userListScreen);
+    expect(typeof screens[0].props.component).toBe('function');
     expect(screens[1].props.name).toBe(ROUTES.addUserScreen);
+    expect(screens[1].props.component).toBeUndefined();
+    expect(typeof screens[1].props.getComponent).toBe('function');
+
+    const lazyAddUserScreen = screens[1].props.getComponent();
+    expect(typeof lazyAddUserScreen).toBe('function');
   });
 });

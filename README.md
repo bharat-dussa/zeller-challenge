@@ -99,6 +99,12 @@ Latest run: **32 test suites, 62 tests passed**.
 
 CI runs tests with coverage on every push and pull request. Coverage reports are uploaded to Codecov.
 
+## Performance Profiling
+
+Use the Hermes profiling runbook for repeatable startup/render/CPU measurements:
+
+- `docs/performance/hermes-profiling-runbook.md`
+
 ## Packages Used
 
 Core dependencies:
