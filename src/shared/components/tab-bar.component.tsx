@@ -78,6 +78,7 @@ const TabItem = ({
 
 export type TabBarRef = {
   setIndex: (index: number) => void;
+  index: SharedValue<number>;
 };
 
 export const TabBar = forwardRef<TabBarRef, TabBarProps>(
@@ -90,6 +91,7 @@ export const TabBar = forwardRef<TabBarRef, TabBarProps>(
 
     useImperativeHandle(ref, () => ({
       setIndex,
+      index: animatedIndex
     }));
 
     const toggleSearch = () => {

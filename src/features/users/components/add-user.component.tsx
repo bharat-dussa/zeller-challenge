@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   StyleSheet,
@@ -13,7 +13,7 @@ import { useRealmService } from '../../../app/providers/realm-service.context';
 import { AppButton } from '../../../shared/components/app-button.component';
 import { AppBottomSheet } from '../../../shared/components/app-modal.component';
 import CloseIcon from '../../../shared/components/icons/close.icon';
-import { TabBar } from '../../../shared/components/tab-bar.component';
+import { TabBar, TabBarRef } from '../../../shared/components/tab-bar.component';
 import { useAppNavigation } from '../../../shared/hooks/use-app-navigation.hook';
 import { useTabIndex } from '../../../shared/hooks/use-tab-index.hook';
 import { ZellerCustomer } from '../../../shared/services/graphql/types';
@@ -36,10 +36,10 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
     [],
   );
 
-  const { index, setIndex } = useTabIndex(initialIndex);
   const [isShowBottomsheet, setIsShowBottomsheet] = useState(false);
   const [isDeleteClicked, setIsDeleteClicked] = useState(false);
   const navigation = useAppNavigation();
+  const tabBarRef = useRef<TabBarRef>(null);
 
   const {
     control,
@@ -75,7 +75,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
 
   const onPressRole = (idx: number) => {
     setValue('role', ROLES[idx], { shouldValidate: true });
-    setIndex(idx);
+    tabBarRef?.current?.setIndex(idx);
   };
 
   const service = useRealmService();
@@ -100,7 +100,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      role: ROLES[index.value],
+      role: ROLES[Number(tabBarRef?.current?.index.value)],
     };
 
     if (isEditMode) {
@@ -116,6 +116,10 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
       trigger();
     }
   }, [isEditMode, trigger]);
+
+  useEffect(() => {
+    tabBarRef?.current?.setIndex(initialIndex);
+  }, []);
 
   return (
     <SafeAreaView
@@ -203,7 +207,7 @@ export const AddUser: FC<AddUserProps> = ({ isEditMode, user }) => {
           <Text testID="add-user-role-label" style={styles.label}>
             {t.labels['user-role-cap']}
           </Text>
-          <TabBar animatedIndex={index} tabs={ROLES} onPress={onPressRole} />
+          <TabBar ref={tabBarRef} tabs={ROLES} onPress={onPressRole} />
         </View>
 
         {isEditMode && (
