@@ -1,7 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ROUTES } from '../../shared/utils/route';
 import UserListScreen from '../../features/users/screens/user-list.screen';
-import React from 'react';
 
 const Stack = createNativeStackNavigator();
 

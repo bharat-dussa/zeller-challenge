@@ -1,6 +1,5 @@
 import React, {
   forwardRef,
-  useDeferredValue,
   useImperativeHandle,
   useState,
 } from 'react';
@@ -21,10 +20,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { colors } from '../utils/color.util';
-import { t } from '../utils/t';
-import SearchIcon from './icons/search.icon';
 import { useTabIndex } from '../hooks/use-tab-index.hook';
+import { colors } from '../utils/color.util';
+import SearchIcon from './icons/search.icon';
 
 type TabItemProps = {
   label: string;
@@ -175,6 +173,7 @@ export const TabBar = forwardRef<TabBarRef, TabBarProps>(
             />
           ))}
         </Animated.View>
+
         <Animated.View testID="tab-bar-search-wrapper" style={searchStyle}>
           <TextInput
             testID="tab-bar-search-input"

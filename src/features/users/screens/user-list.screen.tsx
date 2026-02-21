@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FloatingButton } from '../../../shared/components/floating-button.component';
@@ -36,9 +36,18 @@ const UserListScreen = () => {
     navigation.navigate(ROUTES.addUserScreen);
   }, [navigation, onTabPress]);
 
+  let [count, setCount] = useState(0);
+
+  const onPress = () => {
+    count = count + 1;
+    setCount(count + 1);
+  };
   return (
     <SafeAreaView testID="user-list-screen" style={styles.flex}>
       <View testID="user-list-tab-container" style={styles.tabContainer}>
+        <Pressable onPress={onPress}>
+          <Text>{count}</Text>
+        </Pressable>
         <TabBar
           ref={tabSwipeRef}
           tabs={TABS}
@@ -48,7 +57,6 @@ const UserListScreen = () => {
           searchQuery={searchQuery}
         />
       </View>
-
       <PagerView
         testID="user-list-pager"
         ref={pagerRef}
